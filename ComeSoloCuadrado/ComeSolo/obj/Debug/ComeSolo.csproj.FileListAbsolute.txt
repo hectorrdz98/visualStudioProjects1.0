@@ -1,0 +1,14 @@
+C:\Users\sasuk\source\repos\ComeSolo\ComeSolo\bin\Debug\ComeSolo.exe.config
+C:\Users\sasuk\source\repos\ComeSolo\ComeSolo\bin\Debug\ComeSolo.exe
+C:\Users\sasuk\source\repos\ComeSolo\ComeSolo\bin\Debug\ComeSolo.pdb
+C:\Users\sasuk\source\repos\ComeSolo\ComeSolo\obj\Debug\ComeSolo.csprojAssemblyReference.cache
+C:\Users\sasuk\source\repos\ComeSolo\ComeSolo\obj\Debug\ComeSolo.csproj.CoreCompileInputs.cache
+C:\Users\sasuk\source\repos\ComeSolo\ComeSolo\obj\Debug\ComeSolo.exe
+C:\Users\sasuk\source\repos\ComeSolo\ComeSolo\obj\Debug\ComeSolo.pdb
+C:\Users\sasuk\source\repos\ComeSoloCuadrado\ComeSolo\bin\Debug\ComeSolo.exe.config
+C:\Users\sasuk\source\repos\ComeSoloCuadrado\ComeSolo\bin\Debug\ComeSolo.exe
+C:\Users\sasuk\source\repos\ComeSoloCuadrado\ComeSolo\bin\Debug\ComeSolo.pdb
+C:\Users\sasuk\source\repos\ComeSoloCuadrado\ComeSolo\obj\Debug\ComeSolo.csprojAssemblyReference.cache
+C:\Users\sasuk\source\repos\ComeSoloCuadrado\ComeSolo\obj\Debug\ComeSolo.csproj.CoreCompileInputs.cache
+C:\Users\sasuk\source\repos\ComeSoloCuadrado\ComeSolo\obj\Debug\ComeSolo.exe
+C:\Users\sasuk\source\repos\ComeSoloCuadrado\ComeSolo\obj\Debug\ComeSolo.pdb

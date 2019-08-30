@@ -1,0 +1,7 @@
+C:\Users\sasuk\source\repos\8 Puzzle\8 Puzzle\bin\Debug\8 Puzzle.exe.config
+C:\Users\sasuk\source\repos\8 Puzzle\8 Puzzle\bin\Debug\8 Puzzle.exe
+C:\Users\sasuk\source\repos\8 Puzzle\8 Puzzle\bin\Debug\8 Puzzle.pdb
+C:\Users\sasuk\source\repos\8 Puzzle\8 Puzzle\obj\Debug\8 Puzzle.csprojAssemblyReference.cache
+C:\Users\sasuk\source\repos\8 Puzzle\8 Puzzle\obj\Debug\8 Puzzle.csproj.CoreCompileInputs.cache
+C:\Users\sasuk\source\repos\8 Puzzle\8 Puzzle\obj\Debug\8 Puzzle.exe
+C:\Users\sasuk\source\repos\8 Puzzle\8 Puzzle\obj\Debug\8 Puzzle.pdb

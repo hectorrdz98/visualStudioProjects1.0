@@ -1,0 +1,7 @@
+C:\Users\sasuk\source\repos\Evalua\Evalua\obj\Debug\Evalua.csprojAssemblyReference.cache
+C:\Users\sasuk\source\repos\Evalua\Evalua\obj\Debug\Evalua.csproj.CoreCompileInputs.cache
+C:\Users\sasuk\source\repos\Evalua\Evalua\bin\Debug\Evalua.exe.config
+C:\Users\sasuk\source\repos\Evalua\Evalua\bin\Debug\Evalua.exe
+C:\Users\sasuk\source\repos\Evalua\Evalua\bin\Debug\Evalua.pdb
+C:\Users\sasuk\source\repos\Evalua\Evalua\obj\Debug\Evalua.exe
+C:\Users\sasuk\source\repos\Evalua\Evalua\obj\Debug\Evalua.pdb

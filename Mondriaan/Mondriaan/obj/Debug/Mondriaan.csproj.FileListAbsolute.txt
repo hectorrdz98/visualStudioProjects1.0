@@ -1,0 +1,7 @@
+C:\Users\sasuk\source\repos\Mondriaan\Mondriaan\bin\Debug\Mondriaan.exe.config
+C:\Users\sasuk\source\repos\Mondriaan\Mondriaan\bin\Debug\Mondriaan.exe
+C:\Users\sasuk\source\repos\Mondriaan\Mondriaan\bin\Debug\Mondriaan.pdb
+C:\Users\sasuk\source\repos\Mondriaan\Mondriaan\obj\Debug\Mondriaan.csprojAssemblyReference.cache
+C:\Users\sasuk\source\repos\Mondriaan\Mondriaan\obj\Debug\Mondriaan.csproj.CoreCompileInputs.cache
+C:\Users\sasuk\source\repos\Mondriaan\Mondriaan\obj\Debug\Mondriaan.exe
+C:\Users\sasuk\source\repos\Mondriaan\Mondriaan\obj\Debug\Mondriaan.pdb

@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29209.62
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Evalua", "Evalua\Evalua.csproj", "{6AC5DCD8-7256-4BA0-8B1B-FDD056C95310}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{6AC5DCD8-7256-4BA0-8B1B-FDD056C95310}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6AC5DCD8-7256-4BA0-8B1B-FDD056C95310}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6AC5DCD8-7256-4BA0-8B1B-FDD056C95310}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6AC5DCD8-7256-4BA0-8B1B-FDD056C95310}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {96439BD0-06C6-4E4A-9053-CCB0D6E65862}
+	EndGlobalSection
+EndGlobal
