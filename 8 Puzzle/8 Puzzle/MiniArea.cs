@@ -9,12 +9,14 @@ namespace _8_Puzzle
     class MiniArea
     {
         public int[,] data;
+        public MiniArea father;
         public int weight;
         public int steps;
 
-        public MiniArea(int[,] data, int weight, int steps)
+        public MiniArea(int[,] data, MiniArea father, int weight, int steps)
         {
             this.data = data;
+            this.father = father;
             this.weight = weight;
             this.steps = steps;
         }
@@ -23,7 +25,7 @@ namespace _8_Puzzle
         {
             List<MiniArea> nbs = new List<MiniArea>();
             int[] whiteSpace = this.findWS();
-            Console.WriteLine("WhiteSpace in [{0}][{1}]", whiteSpace[0], whiteSpace[1]);
+            // Console.WriteLine("WhiteSpace in [{0}][{1}]", whiteSpace[0], whiteSpace[1]);
 
             int[,] moves = {
                 { whiteSpace[0], whiteSpace[1] + 1 },
@@ -35,12 +37,22 @@ namespace _8_Puzzle
             for (int i = 0; i<4; i++)
                 if (moves[i,0] >= 0 && moves[i,0] < data.GetLength(0) && moves[i,1] >= 0 && moves[i,1] < data.GetLength(1))
                 {
-                    Console.WriteLine("[{0}][{1}] es un movimiento valido", moves[i,0], moves[i,1]);
+                    // Console.WriteLine("[{0}][{1}] es un movimiento valido", moves[i,0], moves[i,1]);
                     int[,] neighbor = this.shuffle(whiteSpace[0], whiteSpace[1], moves[i,0], moves[i,1]);
-                    nbs.Add(new MiniArea(neighbor, -1, this.steps + 1));
-                } else { Console.WriteLine("[{0}][{1}] no es un movimiento valido", moves[i,0], moves[i,1]); }
+                    nbs.Add(new MiniArea(neighbor, this, 9999, this.steps + 1));
+                } else { // Console.WriteLine("[{0}][{1}] no es un movimiento valido", moves[i,0], moves[i,1]); 
+                }
 
             return nbs;
+        }
+
+        public string dataString()
+        {
+            string res = "";
+            for (int i = 0; i < data.GetLength(0); i++)
+                for (int j = 0; j < data.GetLength(1); j++)
+                    res += data[i, j];
+            return res;
         }
 
         private int[] findWS()
@@ -62,14 +74,14 @@ namespace _8_Puzzle
                     else res[i, j] = this.data[i, j];
                 }
 
-            Console.WriteLine("Suffled neighbor: ");
+            /* Console.WriteLine("Suffled neighbor: ");
 
             for (int i = 0; i < res.GetLength(0); i++)
             {
                 for (int j = 0; j < res.GetLength(1); j++)
                     Console.Write(res[i, j] + " ");
                 Console.WriteLine();
-            }
+            }*/
 
             return res;
         }
