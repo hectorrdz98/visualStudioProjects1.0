@@ -16,55 +16,55 @@ namespace Evalua
         private const int e = -2;
 
         private int[,] Trnd = {
-            {  0,  0,  1,  2, 32,  1,  8,  9, 10, 11, 12, 14, 16, 18, 19, 21, 23, 23, 25, 27, 32 }, 
-            {  f,  f,  1,  1,  f,  1,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f }, 
-            {  f,  f,  f,  2,  3,  5,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f }, 
-            {  e,  e,  e,  4,  e,  e,  e,  e,  e,  e,  e,  e,  e,  e,  e,  e,  e,  e,  e,  e,  e }, 
-            {  f,  f,  f,  4,  f,  5,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f }, 
-            {  e,  e,  e,  7,  e,  e,  e,  e,  e,  e,  e,  e,  e,  e,  6,  6,  e,  e,  e,  e,  e }, 
-            {  e,  e,  e,  7,  e,  e,  e,  e,  e,  e,  e,  e,  e,  e,  e,  e,  e,  e,  e,  e,  e }, 
-            {  f,  f,  f,  7,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f }, 
-            {  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f }, 
-            {  f,  f,  f,  f,  f,  f,  f, 17,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f }, 
-            {  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f }, 
-            {  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f }, 
-            {  f,  f,  f,  f,  f,  f,  f,  f,  f,  f, 13,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f }, 
-            {  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f }, 
-            {  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f, 15,  f,  f,  f,  f,  f,  f,  f,  f,  f }, 
-            {  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f }, 
-            {  f,  f,  f,  f,  f,  f,  f, 17,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f }, 
-            {  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f }, 
-            {  f,  f,  f,  f,  f,  f,  f, 17,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f }, 
-            {  f,  f,  f,  f,  f,  f,  f, 20,  f,  f,  f,  f,  f,  f, 20,  f,  f,  f,  f,  f,  f }, 
-            {  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f }, 
-            {  f,  f,  f,  f,  f,  f,  f, 22,  f,  f,  f,  f,  f,  f,  f, 22,  f,  f,  f,  f,  f }, 
-            {  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f }, 
-            {  f,  f,  f,  f,  f,  f,  f, 24,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f }, 
-            {  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f }, 
-            { 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 26, 25, 25 }, 
-            {  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f }, 
-            {  f,  f,  f,  f,  f,  f,  f, 24,  f,  f,  f,  f,  f,  f,  f,  f, 29,  f,  f, 28,  f }, 
-            { 28,  0, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28 }, 
-            { 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 30, 29, 29, 29, 29 }, 
-            { 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 30, 29, 29, 31, 29 }, 
-            { 0,   0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0 }, 
-            {  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f },
+            {  0,  0,  1,  2, 32,  1,  8,  9, 10, 11, 12, 14, 16, 18, 19, 21, 23, 23, 25, 27,  f, 32 }, 
+            {  f,  f,  1,  1,  f,  1,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f }, 
+            {  f,  f,  f,  2,  3,  5,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f }, 
+            {  e,  e,  e,  4,  e,  e,  e,  e,  e,  e,  e,  e,  e,  e,  e,  e,  e,  e,  e,  e,  e,  e }, 
+            {  f,  f,  f,  4,  f,  5,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f }, 
+            {  e,  e,  e,  7,  e,  e,  e,  e,  e,  e,  e,  e,  e,  e,  6,  6,  e,  e,  e,  e,  e,  e }, 
+            {  e,  e,  e,  7,  e,  e,  e,  e,  e,  e,  e,  e,  e,  e,  e,  e,  e,  e,  e,  e,  e,  e }, 
+            {  f,  f,  f,  7,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f }, 
+            {  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f }, 
+            {  f,  f,  f,  f,  f,  f,  f, 17,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f }, 
+            {  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f }, 
+            {  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f }, 
+            {  f,  f,  f,  f,  f,  f,  f,  f,  f,  f, 13,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f }, 
+            {  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f }, 
+            {  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f, 15,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f }, 
+            {  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f }, 
+            {  f,  f,  f,  f,  f,  f,  f, 17,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f }, 
+            {  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f }, 
+            {  f,  f,  f,  f,  f,  f,  f, 17,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f }, 
+            {  f,  f,  f,  f,  f,  f,  f, 20,  f,  f,  f,  f,  f,  f, 20,  f,  f,  f,  f,  f,  f,  f }, 
+            {  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f }, 
+            {  f,  f,  f,  f,  f,  f,  f, 22,  f,  f,  f,  f,  f,  f,  f, 22,  f,  f,  f,  f,  f,  f }, 
+            {  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f }, 
+            {  f,  f,  f,  f,  f,  f,  f, 24,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f }, 
+            {  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f }, 
+            { 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 26, 25,  e, 25 }, 
+            {  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f }, 
+            {  f,  f,  f,  f,  f,  f,  f, 24,  f,  f,  f,  f,  f,  f,  f,  f, 29,  f,  f, 28,  f,  f }, 
+            { 28,  0, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28,  f, 28 }, 
+            { 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 30, 29, 29, 29,  f, 29 }, 
+            { 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 30, 29, 29, 31,  f, 29 }, 
+            { 0,   0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  f,  0 }, 
+            {  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f },
         };
 
         public Lexico()
         {
             archivo = new StreamReader("C:\\archivos\\prueba.cs");
-            log = new StreamWriter("C:\\archivos\\prueba.log");
+            log = new StreamWriter("C:\\archivos\\prueba.log", true);
         }
 
         public Lexico(string filePath)
         {
-            log = new StreamWriter(Path.GetDirectoryName(filePath) + "\\" + Path.GetFileNameWithoutExtension(filePath) + ".log");
+            log = new StreamWriter(Path.GetDirectoryName(filePath) + "\\" + Path.GetFileNameWithoutExtension(filePath) + ".log", true);
             if (Path.GetExtension(filePath) != ".cs")
             {
                 try
                 {
-                    log.WriteLine("The file extension isn't .cs");
+                    log.WriteLine(DateTime.Now.ToString("dd/MM/yy HH:mm") + " - The file extension isn't .cs");
                     throw new LexicoExcepcion("The file extension isn't .cs");
                 }
                 finally { closeFiles(); }
@@ -74,7 +74,7 @@ namespace Evalua
             {
                 try
                 {
-                    log.WriteLine("The file " + Path.GetFileName(filePath) + " doesn't exist");
+                    log.WriteLine(DateTime.Now.ToString("dd/MM/yy HH:mm") + " - The file " + Path.GetFileName(filePath) + " doesn't exist");
                     throw new LexicoExcepcion("The file " + Path.GetFileName(filePath) + " doesn't exist");
                 }
                 finally { closeFiles(); }
@@ -175,8 +175,12 @@ namespace Evalua
             {
                 return 19;
             }
+            else if (archivo.EndOfStream)
+            {
+                return 20;
+            }
 
-            return 20;
+            return 21;
         }
 
         public void nextToken()
@@ -229,7 +233,7 @@ namespace Evalua
                 {
                     try
                     {
-                        log.WriteLine("Lexic error after " + buffer);
+                        log.WriteLine(DateTime.Now.ToString("dd/MM/yy HH:mm") + " - Lexic error after " + buffer);
                         throw new LexicoExcepcion("Lexic error after", buffer);
                     }
                     finally { closeFiles(); }

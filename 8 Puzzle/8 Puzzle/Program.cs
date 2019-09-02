@@ -22,20 +22,10 @@ namespace _8_Puzzle
 
         static void Main(string[] args)
         {
-            /*int[,] game = {
-                { 1, 2, 3 },
-                { 4, 0, 6 },
-                { 7, 5, 8 }
-            };*/
-            /*int[,] game = {
-                { 8, 3, 4 },
-                { 1, 5, 6 },
-                { 2, 7, 0 }
-            };*/
             int[,] game = {
-                { 1, 3, 6 },
-                { 4, 2, 8 },
-                { 7, 0, 5 }
+                { 0, 1, 2 },
+                { 6, 3, 4 },
+                { 7, 5, 8 }
             };
 
             posibles = new List<MiniArea>();
@@ -54,7 +44,6 @@ namespace _8_Puzzle
 
         static void process(int[,] game)
         {
-
             MiniArea actual = new MiniArea(game, null, 0, 0);
             actual.weight = getWeight(actual);
             posibles.Add(actual);
@@ -84,7 +73,8 @@ namespace _8_Puzzle
 
                 foreach (MiniArea neighbor in actual.getNeighbors())
                 {
-                    if (!alreadyVisited.Contains(neighbor.dataString()))
+                    if (!alreadyVisited.Contains(
+                        neighbor.dataString()))
                     {
                         // Console.WriteLine("The neighbor is not in the visited list");
                         neighbor.weight = getWeight(neighbor);

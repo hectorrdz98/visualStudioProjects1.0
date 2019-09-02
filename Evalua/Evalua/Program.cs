@@ -12,7 +12,7 @@ namespace Evalua
         {
             try
             {
-                Lexico L = new Lexico("C:\\archivos\\prueba3.cs");
+                Lexico L = new Lexico("C:\\archivos\\prueba.cs");
                 while (!L.archivo.EndOfStream)
                 {
                     L.nextToken();

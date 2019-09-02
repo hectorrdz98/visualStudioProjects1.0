@@ -10,13 +10,10 @@ namespace _8_Puzzle
     {
         public int Compare(MiniArea x, MiniArea y)
         {
-            if (x.weight >= y.weight)
-                if (x.steps > y.weight)
-                    return 1;
-                else
-                    return 0;
+            if (x.weight > y.weight)
+                return 1;
             else
-                return -1;
+                return 0;
 
         }
     }
