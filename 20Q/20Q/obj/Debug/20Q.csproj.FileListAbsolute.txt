@@ -1,0 +1,7 @@
+C:\Users\sasuk\source\repos\20Q\20Q\bin\Debug\20Q.exe.config
+C:\Users\sasuk\source\repos\20Q\20Q\bin\Debug\20Q.exe
+C:\Users\sasuk\source\repos\20Q\20Q\bin\Debug\20Q.pdb
+C:\Users\sasuk\source\repos\20Q\20Q\obj\Debug\20Q.csprojAssemblyReference.cache
+C:\Users\sasuk\source\repos\20Q\20Q\obj\Debug\20Q.csproj.CoreCompileInputs.cache
+C:\Users\sasuk\source\repos\20Q\20Q\obj\Debug\20Q.exe
+C:\Users\sasuk\source\repos\20Q\20Q\obj\Debug\20Q.pdb

@@ -7,10 +7,10 @@ using System.IO;
 
 namespace Evalua
 {
-    class Lexico : Token, IDisposable
+    class Lexico : Token
     {
         public StreamReader archivo;
-        private StreamWriter log;
+        protected StreamWriter log;
 
         private const int f = -1;
         private const int e = -2;
@@ -53,19 +53,35 @@ namespace Evalua
 
         public Lexico()
         {
-            archivo = new StreamReader("C:\\archivos\\prueba.cs");
-            log = new StreamWriter("C:\\archivos\\prueba.log", true);
+            //Console.WriteLine("Inicio de analisis léxico");
+            string filePath = "C:\\archivos\\prueba.cs";
+            log = new StreamWriter("C:\\archivos\\prueba.log");
+            if (!File.Exists(filePath))
+            {
+                try
+                {
+                    log.WriteLine(DateTime.Now.ToString("dd/MM/yy HH:mm") + " - The file " + Path.GetFileName(filePath) + " doesn't exist");
+                    throw new MyException("Error de léxico: The file " + Path.GetFileName(filePath) + " doesn't exist");
+                }
+                finally { closeFiles(); }
+            }
+            log.WriteLine("Nombre del programa: prueba.log");
+            log.WriteLine("Path: C:\\archivos");
+            log.WriteLine("Fecha: " + DateTime.Now.ToString("dd/MM/yy"));
+            this.compilationToLog("started");
+            archivo = new StreamReader(filePath);
         }
 
         public Lexico(string filePath)
         {
-            log = new StreamWriter(Path.GetDirectoryName(filePath) + "\\" + Path.GetFileNameWithoutExtension(filePath) + ".log", true);
+            //Console.WriteLine("Inicio de analisis léxico");
+            log = new StreamWriter(Path.GetDirectoryName(filePath) + "\\" + Path.GetFileNameWithoutExtension(filePath) + ".log");
             if (Path.GetExtension(filePath) != ".cs")
             {
                 try
                 {
                     log.WriteLine(DateTime.Now.ToString("dd/MM/yy HH:mm") + " - The file extension isn't .cs");
-                    throw new LexicoExcepcion("The file extension isn't .cs");
+                    throw new MyException("The file extension isn't .cs");
                 }
                 finally { closeFiles(); }
             }
@@ -75,20 +91,32 @@ namespace Evalua
                 try
                 {
                     log.WriteLine(DateTime.Now.ToString("dd/MM/yy HH:mm") + " - The file " + Path.GetFileName(filePath) + " doesn't exist");
-                    throw new LexicoExcepcion("The file " + Path.GetFileName(filePath) + " doesn't exist");
+                    throw new MyException("The file " + Path.GetFileName(filePath) + " doesn't exist");
                 }
                 finally { closeFiles(); }
             }
+            log.WriteLine("Nombre del programa: " + Path.GetFileName(filePath));
+            log.WriteLine("Path: " + Path.GetDirectoryName(filePath));
+            log.WriteLine("Fecha: " + DateTime.Now.ToString("dd/MM/yy"));
+            this.compilationToLog("started");
             archivo = new StreamReader(filePath);
         }
 
-        public void Dispose()
+        ~Lexico()
         {
-            closeFiles();
+            //Console.WriteLine("Terminó analisis léxico");
         }
 
-        private void closeFiles()
+        public void compilationToLog(string fase)
         {
+            if (fase == "ended") log.WriteLine();
+            log.WriteLine("Compilation " + fase + ": " + DateTime.Now.ToString("dd/MM/yy HH:mm"));
+            if (fase == "started") log.WriteLine();
+        }
+
+        public void closeFiles()
+        {
+            compilationToLog("ended");
             if (archivo != null) archivo.Close();
             log.Close();
         }
@@ -234,13 +262,30 @@ namespace Evalua
                     try
                     {
                         log.WriteLine(DateTime.Now.ToString("dd/MM/yy HH:mm") + " - Lexic error after " + buffer);
-                        throw new LexicoExcepcion("Lexic error after", buffer);
+                        throw new MyException("Lexic error after", buffer);
                     }
                     finally { closeFiles(); }
                 }
             }
 
             this.setContenido(buffer);
+
+            if (getClasificacion() == c.Identificador)
+            {
+                switch (getContenido())
+                {
+                    case "char":
+                    case "int":
+                    case "float":
+                    case "double":
+                    case "string":
+                        setClasificacion(c.TipoDato);
+                        break;
+                    case "const":
+                        setClasificacion(c.Constante);
+                        break;
+                }
+            }
         }
     }
 }

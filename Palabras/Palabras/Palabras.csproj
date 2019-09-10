@@ -4,10 +4,10 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{6AC5DCD8-7256-4BA0-8B1B-FDD056C95310}</ProjectGuid>
+    <ProjectGuid>{095A4372-BC5A-4EAA-BCDE-9A001DB184E7}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <RootNamespace>Evalua</RootNamespace>
-    <AssemblyName>Evalua</AssemblyName>
+    <RootNamespace>Palabras</RootNamespace>
+    <AssemblyName>Palabras</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -43,14 +43,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Lenguaje.cs" />
-    <Compile Include="MyException.cs" />
-    <Compile Include="Lexico.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Sintaxis.cs" />
-    <Compile Include="Token.cs" />
-    <Compile Include="Variable.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

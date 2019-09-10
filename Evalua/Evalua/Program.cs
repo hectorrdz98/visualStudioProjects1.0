@@ -12,15 +12,19 @@ namespace Evalua
         {
             try
             {
-                Lexico L = new Lexico("C:\\archivos\\prueba.cs");
-                while (!L.archivo.EndOfStream)
+                Lenguaje L = new Lenguaje("C:\\archivos\\prueba3.cs");
+                /*while (!L.archivo.EndOfStream)
                 {
                     L.nextToken();
                     Console.WriteLine(L.getContenido() + " " + L.getClasificacion());
-                }
+                }*/
+                // Checar esta secuencia: # include <iostream.h>
+                L.Programa();
                 Console.ReadKey();
+                Console.WriteLine();
+                L.closeFiles();
             }
-            catch (LexicoExcepcion) { };
+            catch (MyException) { }
         }
     }
 }
