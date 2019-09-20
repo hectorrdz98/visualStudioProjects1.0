@@ -9,19 +9,22 @@ namespace Evalua
     class Lenguaje : Sintaxis
     {
         List<Variable> variables;
-        List<Funcion> funciones;
+        //List<Funcion> funciones;
+        List<string> funciones;
         Stack<float> evalua;
 
         public Lenguaje() : base()
         {
             variables = new List<Variable>();
-            funciones = new List<Funcion>();
+            //funciones = new List<Funcion>();
+            funciones = new List<string>();
             evalua = new Stack<float>();
         }
         public Lenguaje(string filePath) : base(filePath)
         {
             variables = new List<Variable>();
-            funciones = new List<Funcion>();
+            //funciones = new List<Funcion>();
+            funciones = new List<string>();
             evalua = new Stack<float>();
         }
 
@@ -30,7 +33,7 @@ namespace Evalua
             Librerias();
             Main();
             imprimeVariables();
-            imprimeFunciones();
+            // imprimeFunciones();
         }
 
         private void Librerias()
@@ -43,7 +46,7 @@ namespace Evalua
                 subLibreria += SubLibrerias();
                 if (subLibreria == "System.Math")
                 {
-                    Funcion abs = new Funcion("abs");
+                    /*Funcion abs = new Funcion("abs");
                     abs.func = new Func<float, float>((n) => { return Math.Abs(n); });
                     funciones.Add(abs);
 
@@ -61,7 +64,14 @@ namespace Evalua
 
                     Funcion trunc = new Funcion("trunc");
                     trunc.func = new Func<float, float>((n) => { return (float) Math.Truncate(n); });
-                    funciones.Add(trunc);
+                    funciones.Add(trunc);*/
+
+                    funciones.Add("abs");
+                    funciones.Add("sqrt");
+                    funciones.Add("pow2");
+                    funciones.Add("round");
+                    funciones.Add("trunc");
+
                 }
             }
             Match(c.FinSentencia);
@@ -249,12 +259,27 @@ namespace Evalua
 
         private void IF()
         {
+            log.WriteLine();
+            log.WriteLine("IF:");
+
             Match(c.If);
             Match("(");
             Expresion();
+
+            float exp1 = evalua.Pop();
+            string opRel = getContenido();
+            log.Write("-> " + exp1 + " " + opRel + " ");
+
             Match(c.OperadorRelacional);
             Expresion();
+
+            float exp2 = evalua.Pop();
+            bool resIf = Verificar(exp1, exp2, opRel);
+            log.WriteLine("-> " + exp2 + " = " + resIf);
+            log.WriteLine();
+
             Match(")");
+
 
             if (getClasificacion() == c.InicioBloque)
             {
@@ -277,6 +302,20 @@ namespace Evalua
                     Instruccion();
                 }
             }
+        }
+
+        private bool Verificar(float exp1, float exp2, string rel)
+        {
+            switch (rel)
+            {
+                case "==": return exp1 == exp2 ? true : false;
+                case "!=": return exp1 != exp2 ? true : false;
+                case "<": return exp1 < exp2 ? true : false;
+                case "<=": return exp1 <= exp2 ? true : false;
+                case ">": return exp1 > exp2 ? true : false;
+                case ">=": return exp1 >= exp2 ? true : false;
+            }
+            return false;
         }
 
         private void ListaDeIdentificadores(Variable.t tipoVariable)
@@ -449,7 +488,8 @@ namespace Evalua
             }
             else if (getClasificacion() == c.Funcion)
             {
-                if (existeFuncion(getContenido()))
+                //if (existeFuncion(getContenido()))
+                if (funciones.Contains(getContenido()))
                 {
                     string funcion = getContenido();
                     Match(c.Funcion);
@@ -457,8 +497,9 @@ namespace Evalua
                     Expresion();
                     Match(")");
                     log.Write(funcion + " ");
-                    Funcion f = getFuncion(funcion);
-                    evalua.Push(f.func(evalua.Pop()));
+                    //Funcion f = getFuncion(funcion);
+                    //evalua.Push(f.func(evalua.Pop()));
+                    evalua.Push(Funcion(funcion, evalua.Pop()));
                 }
                 else
                 {
@@ -501,6 +542,19 @@ namespace Evalua
             }
         }
 
+        private float Funcion(string nombre, float n)
+        {
+            switch (nombre)
+            {
+                case "abs": return Math.Abs(n);
+                case "sqrt": return (float) Math.Sqrt(n);
+                case "pow2": return n * n;
+                case "round": return (float) Math.Round(n);
+                case "trunc": return (float) Math.Truncate(n);
+            }
+            return n;
+        }
+
         private bool existeVariable(string nombre)
         {
             foreach(Variable v in variables)
@@ -510,29 +564,11 @@ namespace Evalua
             return false;
         }
 
-        private bool existeFuncion(string nombre)
-        {
-            foreach (Funcion f in funciones)
-            {
-                if (f.getNombre() == nombre) return true;
-            }
-            return false;
-        }
-
         private Variable getVariable(string nombre)
         {
             foreach (Variable v in variables)
             {
                 if (v.getNombre() == nombre) return v;
-            }
-            return null;
-        }
-
-        private Funcion getFuncion(string nombre)
-        {
-            foreach (Funcion f in funciones)
-            {
-                if (f.getNombre() == nombre) return f;
             }
             return null;
         }
@@ -575,7 +611,25 @@ namespace Evalua
             }
         }
 
-        private void imprimeFunciones()
+        /*private bool existeFuncion(string nombre)
+        {
+            foreach (Funcion f in funciones)
+            {
+                if (f.getNombre() == nombre) return true;
+            }
+            return false;
+        }*/
+
+        /*private Funcion getFuncion(string nombre)
+        {
+            foreach (Funcion f in funciones)
+            {
+                if (f.getNombre() == nombre) return f;
+            }
+            return null;
+        }*/
+
+        /*private void imprimeFunciones()
         {
             log.WriteLine();
             log.WriteLine("Lista de Funciones: ");
@@ -583,7 +637,7 @@ namespace Evalua
             {
                 log.WriteLine("Nombre: " + f.getNombre());
             }
-        }
+        }*/
 
     }
 }
