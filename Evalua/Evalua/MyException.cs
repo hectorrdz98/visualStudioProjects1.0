@@ -15,12 +15,43 @@ namespace Evalua
             Console.ForegroundColor = ConsoleColor.White;
         }
 
-        public MyException(string message, string highlighted) : base(message)
+        /*public MyException(string message, string highlighted) : base(message)
         {
             Console.ForegroundColor = ConsoleColor.Red;
             Console.Write("\n"+message);
             Console.ForegroundColor = ConsoleColor.Yellow;
             Console.WriteLine(" " + highlighted + "\n");
+            Console.ForegroundColor = ConsoleColor.White;
+        }*/
+        public MyException(string message, string highlighted) : base(message)
+        {
+            int init = message.IndexOf("###");
+            bool flag = false;
+
+            Console.WriteLine(init);
+
+            message = message.Replace("###", "");
+
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine();
+            for (int i = 0; i < message.Length; i++)
+            {
+                if (i == init)
+                {
+                    Console.ForegroundColor = ConsoleColor.Yellow;
+                    Console.Write(highlighted);
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    flag = true;
+                }
+                Console.Write(message[i]);
+            }
+            if (!flag)
+            {
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.Write(highlighted);
+                Console.ForegroundColor = ConsoleColor.Red;
+            }
+            Console.WriteLine();
             Console.ForegroundColor = ConsoleColor.White;
         }
     }

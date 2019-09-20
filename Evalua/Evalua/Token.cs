@@ -11,7 +11,7 @@ namespace Evalua
         public enum c { Identificador, Numero, Asignacion, OperadorLogico, OperadorRelacional,
             OperadorTermino, OperadorFactor, IncrementoTermino, IncrementoFactor, Cadena,
             FinSentencia, InicioBloque, FinBloque, Caracter, TipoDato,
-            Constante };
+            Constante, Funcion, If };
         private c clasificacion;
         private string contenido;
 
@@ -23,6 +23,7 @@ namespace Evalua
         {
             return this.clasificacion;
         }
+        
 
         public void setContenido(string newContenido)
         {

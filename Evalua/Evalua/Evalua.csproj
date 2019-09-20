@@ -43,6 +43,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Funcion.cs" />
     <Compile Include="Lenguaje.cs" />
     <Compile Include="MyException.cs" />
     <Compile Include="Lexico.cs" />

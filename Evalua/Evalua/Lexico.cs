@@ -14,6 +14,8 @@ namespace Evalua
 
         private const int f = -1;
         private const int e = -2;
+        protected int actRow = 1;
+        protected int actColumn = 1;
 
         private int[,] Trnd = {
             {  0,  0,  1,  2, 32,  1,  8,  9, 10, 11, 12, 14, 16, 18, 19, 21, 23, 23, 25, 27,  f, 32 }, 
@@ -220,11 +222,18 @@ namespace Evalua
             while(estado >= 0)
             {
                 transicion = (char) archivo.Peek();
-                int preEstado = estado;
+
+                if (transicion == '\n')
+                {
+                    this.actRow++;
+                    this.actColumn = 1;
+                }
+
                 estado = Trnd[estado, this.getColumna(transicion)];
                 if (estado >= 0)
                 {
                     archivo.Read();
+                    this.actColumn++;
                     if (estado == 0) buffer = "";
                     if (estado > 0)
                     {
@@ -261,8 +270,10 @@ namespace Evalua
                 {
                     try
                     {
-                        log.WriteLine(DateTime.Now.ToString("dd/MM/yy HH:mm") + " - Lexic error after " + buffer);
-                        throw new MyException("Lexic error after", buffer);
+                        log.WriteLine(DateTime.Now.ToString("dd/MM/yy HH:mm") + " - Error léxico en la linea " + this.actRow + " en la columna " +
+                        this.actColumn + " después de " + buffer);
+                        throw new MyException("Error léxico en la linea " + this.actRow + " en la columna " +
+                        this.actColumn + " después de ###", buffer);
                     }
                     finally { closeFiles(); }
                 }
@@ -283,6 +294,16 @@ namespace Evalua
                         break;
                     case "const":
                         setClasificacion(c.Constante);
+                        break;
+                    case "abs":
+                    case "sqrt":
+                    case "pow2":
+                    case "round":
+                    case "trunc":
+                        setClasificacion(c.Funcion);
+                        break;
+                    case "if":
+                        setClasificacion(c.If);
                         break;
                 }
             }
