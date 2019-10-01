@@ -9,7 +9,7 @@ namespace Evalua
 {
     class Lexico : Token
     {
-        public StreamReader archivo;
+        public FileStream archivo;
         protected StreamWriter log;
 
         private const int f = -1;
@@ -48,7 +48,7 @@ namespace Evalua
             {  f,  f,  f,  f,  f,  f,  f, 24,  f,  f,  f,  f,  f,  f,  f,  f, 29,  f,  f, 28,  f,  f }, 
             { 28,  0, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28,  f, 28 }, 
             { 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 30, 29, 29, 29,  f, 29 }, 
-            { 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 30, 29, 29, 31,  f, 29 }, 
+            { 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 30, 29, 29,  0,  f, 29 }, 
             { 0,   0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  f,  0 }, 
             {  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f },
         };
@@ -71,7 +71,9 @@ namespace Evalua
             log.WriteLine("Path: C:\\archivos");
             log.WriteLine("Fecha: " + DateTime.Now.ToString("dd/MM/yy"));
             this.compilationToLog("started");
-            archivo = new StreamReader(filePath);
+            // archivo = new StreamReader(filePath);
+            // archivo = File.OpenRead(filePath);
+            archivo = new FileStream(filePath, FileMode.Open, FileAccess.Read);
         }
 
         public Lexico(string filePath)
@@ -101,7 +103,9 @@ namespace Evalua
             log.WriteLine("Path: " + Path.GetDirectoryName(filePath));
             log.WriteLine("Fecha: " + DateTime.Now.ToString("dd/MM/yy"));
             this.compilationToLog("started");
-            archivo = new StreamReader(filePath);
+            // archivo = new StreamReader(filePath);
+            // archivo = File.OpenRead(filePath);
+            archivo = new FileStream(filePath, FileMode.Open, FileAccess.Read);
         }
 
         ~Lexico()
@@ -205,7 +209,7 @@ namespace Evalua
             {
                 return 19;
             }
-            else if (archivo.EndOfStream)
+            else if (archivo.Position >= archivo.Length)
             {
                 return 20;
             }
@@ -221,7 +225,9 @@ namespace Evalua
 
             while(estado >= 0)
             {
-                transicion = (char) archivo.Peek();
+                long position = archivo.Position;
+                transicion = (char) archivo.ReadByte();
+                archivo.Seek(position, SeekOrigin.Begin);
 
                 if (transicion == '\n')
                 {
@@ -232,7 +238,7 @@ namespace Evalua
                 estado = Trnd[estado, this.getColumna(transicion)];
                 if (estado >= 0)
                 {
-                    archivo.Read();
+                    archivo.ReadByte();
                     this.actColumn++;
                     if (estado == 0) buffer = "";
                     if (estado > 0)
@@ -304,6 +310,9 @@ namespace Evalua
                         break;
                     case "if":
                         setClasificacion(c.If);
+                        break;
+                    case "foreach":
+                        setClasificacion(c.ForEach);
                         break;
                 }
             }

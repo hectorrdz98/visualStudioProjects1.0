@@ -11,7 +11,7 @@ namespace Evalua
         public enum c { Identificador, Numero, Asignacion, OperadorLogico, OperadorRelacional,
             OperadorTermino, OperadorFactor, IncrementoTermino, IncrementoFactor, Cadena,
             FinSentencia, InicioBloque, FinBloque, Caracter, TipoDato,
-            Constante, Funcion, If };
+            Constante, Funcion, If, ForEach };
         private c clasificacion;
         private string contenido;
 

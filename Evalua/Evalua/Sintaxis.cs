@@ -36,6 +36,8 @@ namespace Evalua
             {
                 try
                 {
+                    log.WriteLine();
+                    log.WriteLine();
                     log.WriteLine(DateTime.Now.ToString("dd/MM/yy HH:mm") + " - Error de sintaxis en la linea " + this.actRow + " en la columna " +
                         this.actColumn + ": Se espera un " + contenido);
                     throw new MyException("Error de sintaxis en la linea " + this.actRow + " en la columna " +
@@ -56,6 +58,8 @@ namespace Evalua
             {
                 try
                 {
+                    log.WriteLine();
+                    log.WriteLine();
                     log.WriteLine(DateTime.Now.ToString("dd/MM/yy HH:mm") + " - Error de sintaxis en la linea " + this.actRow + " en la columna " +
                         this.actColumn + ": Se espera un " + clasificacion);
                     throw new MyException("Error de sintaxis en la linea " + this.actRow + " en la columna " +

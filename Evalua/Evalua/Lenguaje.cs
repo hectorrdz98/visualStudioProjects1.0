@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -9,21 +10,18 @@ namespace Evalua
     class Lenguaje : Sintaxis
     {
         List<Variable> variables;
-        //List<Funcion> funciones;
         List<string> funciones;
         Stack<float> evalua;
 
         public Lenguaje() : base()
         {
             variables = new List<Variable>();
-            //funciones = new List<Funcion>();
             funciones = new List<string>();
             evalua = new Stack<float>();
         }
         public Lenguaje(string filePath) : base(filePath)
         {
             variables = new List<Variable>();
-            //funciones = new List<Funcion>();
             funciones = new List<string>();
             evalua = new Stack<float>();
         }
@@ -33,7 +31,6 @@ namespace Evalua
             Librerias();
             Main();
             imprimeVariables();
-            // imprimeFunciones();
         }
 
         private void Librerias()
@@ -46,26 +43,6 @@ namespace Evalua
                 subLibreria += SubLibrerias();
                 if (subLibreria == "System.Math")
                 {
-                    /*Funcion abs = new Funcion("abs");
-                    abs.func = new Func<float, float>((n) => { return Math.Abs(n); });
-                    funciones.Add(abs);
-
-                    Funcion sqrt = new Funcion("sqrt");
-                    sqrt.func = new Func<float, float>((n) => { return (float) Math.Sqrt((double) n); });
-                    funciones.Add(sqrt);
-
-                    Funcion pow2 = new Funcion("pow2");
-                    pow2.func = new Func<float, float>((n) => { return n * n; });
-                    funciones.Add(pow2);
-
-                    Funcion round = new Funcion("round");
-                    round.func = new Func<float, float>((n) => { return (float) Math.Round(n); });
-                    funciones.Add(round);
-
-                    Funcion trunc = new Funcion("trunc");
-                    trunc.func = new Func<float, float>((n) => { return (float) Math.Truncate(n); });
-                    funciones.Add(trunc);*/
-
                     funciones.Add("abs");
                     funciones.Add("sqrt");
                     funciones.Add("pow2");
@@ -116,17 +93,34 @@ namespace Evalua
             Match(c.FinBloque);
         }
 
-        private void BloqueDeInstrucciones()
+        private void BloqueDeInstrucciones(bool ejecutar = true, int rep = 1)
         {
+            long position = archivo.Position;
+            int saveActRow = actRow;
+            int saveActCol = actColumn;
             Match(c.InicioBloque);
             {
                 if (getClasificacion() != c.FinBloque)
-                    Instrucciones();
+                {
+                    if (rep == 0) ejecutar = false;
+
+                    for (int i = 0; i < rep; i++)
+                    {
+                        Instrucciones(ejecutar);
+                        if (i < rep - 1)
+                        {
+                            archivo.Seek(position, SeekOrigin.Begin);
+                            actRow = saveActRow;
+                            actColumn = saveActCol;
+                            nextToken();
+                        }
+                    }
+                }
             }
             Match(c.FinBloque);
         }
 
-        private void Instruccion()
+        private void Instruccion(bool ejecutar)
         {
             if (getContenido() == "Console")
             {
@@ -143,9 +137,12 @@ namespace Evalua
                             Match("(");
                             if (getClasificacion() == c.Cadena)
                             {
-                                string output = getContenido();
-                                if (typeOutput == "Write") Console.Write(output.Substring(1, output.Length - 2));
-                                else Console.WriteLine(output.Substring(1, output.Length - 2));
+                                if (ejecutar)
+                                {
+                                    string output = getContenido();
+                                    if (typeOutput == "Write") Console.Write(output.Substring(1, output.Length - 2));
+                                    else Console.WriteLine(output.Substring(1, output.Length - 2));
+                                }
                                 Match(c.Cadena);
                             }
                             else
@@ -154,9 +151,12 @@ namespace Evalua
                                 {
                                     if (existeVariable(getContenido()))
                                     {
-                                        Variable v = getVariable(getContenido());
-                                        if (typeOutput == "Write") Console.Write(v.getValor());
-                                        else Console.WriteLine(v.getValor());
+                                        if (ejecutar)
+                                        {
+                                            Variable v = getVariable(getContenido());
+                                            if (typeOutput == "Write") Console.Write(v.getValor());
+                                            else Console.WriteLine(v.getValor());
+                                        }
                                         Match(c.Identificador);
                                     }
                                     else
@@ -184,9 +184,12 @@ namespace Evalua
                         {
                             string typeInput = getContenido();
                             Match(getContenido());
-                            if (typeInput == "ReadLine") Console.ReadLine();
-                            else if (typeInput == "Read") Console.Read();
-                            else Console.ReadKey();
+                            if (ejecutar)
+                            {
+                                if (typeInput == "ReadLine") Console.ReadLine();
+                                else if (typeInput == "Read") Console.Read();
+                                else Console.ReadKey();
+                            }
                             Match("(");
                             Match(")");
                         }
@@ -209,7 +212,7 @@ namespace Evalua
             {
                 Variable.t tipoVariable = Variable.stringToT(getContenido());
                 Match(c.TipoDato);
-                ListaDeIdentificadores(tipoVariable);
+                ListaDeIdentificadores(tipoVariable, ejecutar);
                 Match(c.FinSentencia);
             }
             else if (getClasificacion() == c.Constante)
@@ -217,12 +220,16 @@ namespace Evalua
                 Match(c.Constante);
                 Variable.t tipoVariable = Variable.stringToT(getContenido());
                 Match(c.TipoDato);
-                ListaDeConstantes(tipoVariable);
+                ListaDeConstantes(tipoVariable, ejecutar);
                 Match(c.FinSentencia);
             }
             else if (getClasificacion() == c.If)
             {
-                IF();
+                IF(ejecutar);
+            }
+            else if (getClasificacion() == c.ForEach)
+            {
+                ForEach(ejecutar);
             }
             else // Modificacion de variables
             {
@@ -233,7 +240,7 @@ namespace Evalua
                     Match(c.Asignacion);
                     string valor = Asignacion(variable);
 
-                    setValor(variable, valor);
+                    if (ejecutar) setValor(variable, valor);
                     Match(c.FinSentencia);
                 }
                 else
@@ -250,75 +257,134 @@ namespace Evalua
             }
         }
 
-        private void Instrucciones()
+        private void Instrucciones(bool ejecutar)
         {
-            Instruccion();
+            Instruccion(ejecutar);
             if (getClasificacion() != c.FinBloque)
-                Instrucciones();
+                Instrucciones(ejecutar);
         }
 
-        private void IF()
+        private void IF(bool ejecutarPre)
         {
-            log.WriteLine();
-            log.WriteLine("IF:");
-
+            log.Write("IF: ");
             Match(c.If);
             Match("(");
-            Expresion();
 
-            float exp1 = evalua.Pop();
-            string opRel = getContenido();
-            log.Write("-> " + exp1 + " " + opRel + " ");
-
-            Match(c.OperadorRelacional);
-            Expresion();
-
-            float exp2 = evalua.Pop();
-            bool resIf = Verificar(exp1, exp2, opRel);
-            log.WriteLine("-> " + exp2 + " = " + resIf);
-            log.WriteLine();
-
+            bool ejecutar = Condicion() && ejecutarPre;
             Match(")");
-
 
             if (getClasificacion() == c.InicioBloque)
             {
-                BloqueDeInstrucciones();
+                BloqueDeInstrucciones(ejecutar);
             }
             else
             {
-                Instruccion();
+                Instruccion(ejecutar);
             }
 
             if (getContenido() == "else")
             {
+                log.Write("Else: ");
                 Match("else");
                 if (getClasificacion() == c.InicioBloque)
                 {
-                    BloqueDeInstrucciones();
+                    BloqueDeInstrucciones(!ejecutar);
                 }
                 else
                 {
-                    Instruccion();
+                    Instruccion(!ejecutar);
                 }
             }
+
+            log.WriteLine();
         }
 
-        private bool Verificar(float exp1, float exp2, string rel)
+        private void ForEach(bool ejecutar)
         {
-            switch (rel)
+            log.Write("IF: ");
+            Match(c.ForEach);
+            Match("(");
+            Expresion();
+
+            int nRep = (int) Math.Truncate(evalua.Pop());
+            long position = archivo.Position;
+            int saveActRow = actRow;
+            int saveActCol = actColumn;
+
+            Match(")");
+
+            if (getClasificacion() == c.InicioBloque)
             {
-                case "==": return exp1 == exp2 ? true : false;
-                case "!=": return exp1 != exp2 ? true : false;
-                case "<": return exp1 < exp2 ? true : false;
-                case "<=": return exp1 <= exp2 ? true : false;
-                case ">": return exp1 > exp2 ? true : false;
-                case ">=": return exp1 >= exp2 ? true : false;
+                BloqueDeInstrucciones(ejecutar, nRep);
             }
-            return false;
+            else
+            {
+                if (nRep == 0)
+                    Instruccion(false);
+
+                for (int i = 0; i < nRep; i++)
+                {
+                    Instruccion(ejecutar);
+                    if (i < nRep - 1)
+                    {
+                        archivo.Seek(position, SeekOrigin.Begin);
+                        actRow = saveActRow;
+                        actColumn = saveActCol;
+                        nextToken();
+                    }
+                }
+            }
+
+            log.WriteLine();
         }
 
-        private void ListaDeIdentificadores(Variable.t tipoVariable)
+        private bool Condicion()
+        {
+            bool not = false;
+            if (getContenido() == "!") { Match(getContenido()); not = true; }
+
+            Expresion();
+            float elem1 = evalua.Pop();
+            string operador = getContenido();
+            Match(c.OperadorRelacional);
+            Expresion();
+            float elem2 = evalua.Pop();
+
+            bool preRes;
+            switch (operador)
+            {
+                case "==": preRes = elem1 == elem2; break;
+                case "!=": preRes = elem1 != elem2; break;
+                case ">": preRes = elem1 > elem2; break;
+                case ">=": preRes = elem1 >= elem2; break;
+                case "<": preRes = elem1 < elem2; break;
+                default: preRes = elem1 <= elem2; break;
+            }
+
+            if (not) preRes = !preRes;
+
+            if (getClasificacion() == c.OperadorLogico)
+            {
+                switch (getContenido())
+                {
+                    case "||":
+                        {
+                            Match(c.OperadorLogico);
+                            preRes = Condicion() || preRes;
+                        } break;
+                    default:
+                        {
+                            Match(c.OperadorLogico);
+                            preRes = Condicion() && preRes;
+                        }
+                        break;
+                }
+            }
+
+            return preRes;
+        }
+
+        private void ListaDeIdentificadores(Variable.t tipoVariable, bool ejecutar)
         {
             string variable = getContenido();
             Match(c.Identificador);
@@ -331,12 +397,12 @@ namespace Evalua
                     valor = Asignacion(variable);
                 }
 
-                variables.Add(new Variable(variable, tipoVariable, valor, false));
+                if (ejecutar) variables.Add(new Variable(variable, tipoVariable, valor, false));
 
                 if (getContenido() == ",")
                 {
                     Match(",");
-                    ListaDeIdentificadores(tipoVariable);
+                    ListaDeIdentificadores(tipoVariable, ejecutar);
                 }
             }
             else
@@ -353,7 +419,7 @@ namespace Evalua
             
         }
 
-        private void ListaDeConstantes(Variable.t tipoVariable)
+        private void ListaDeConstantes(Variable.t tipoVariable, bool ejecutar)
         {
             string constante = getContenido();
             Match(c.Identificador);
@@ -362,12 +428,12 @@ namespace Evalua
                 Match(c.Asignacion);
                 string valor = Asignacion(constante);
 
-                variables.Add(new Variable(constante, tipoVariable, valor, true));
+                if (ejecutar) variables.Add(new Variable(constante, tipoVariable, valor, true));
 
                 if (getContenido() == ",")
                 {
                     Match(",");
-                    ListaDeConstantes(tipoVariable);
+                    ListaDeConstantes(tipoVariable, ejecutar);
                 }
             }
             else
@@ -610,34 +676,5 @@ namespace Evalua
                 log.WriteLine(v.esVariable() ? "Es variable" : "Es constante");
             }
         }
-
-        /*private bool existeFuncion(string nombre)
-        {
-            foreach (Funcion f in funciones)
-            {
-                if (f.getNombre() == nombre) return true;
-            }
-            return false;
-        }*/
-
-        /*private Funcion getFuncion(string nombre)
-        {
-            foreach (Funcion f in funciones)
-            {
-                if (f.getNombre() == nombre) return f;
-            }
-            return null;
-        }*/
-
-        /*private void imprimeFunciones()
-        {
-            log.WriteLine();
-            log.WriteLine("Lista de Funciones: ");
-            foreach (Funcion f in funciones)
-            {
-                log.WriteLine("Nombre: " + f.getNombre());
-            }
-        }*/
-
     }
 }
