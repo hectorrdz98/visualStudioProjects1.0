@@ -154,8 +154,22 @@ namespace Evalua
                                         if (ejecutar)
                                         {
                                             Variable v = getVariable(getContenido());
-                                            if (typeOutput == "Write") Console.Write(v.getValor());
-                                            else Console.WriteLine(v.getValor());
+                                            if (typeOutput == "Write")
+                                            {
+                                                if (v.getTipo() == Variable.t.String)
+                                                {
+                                                    Console.Write(v.getValor().Substring(1, v.getValor().Length - 2));
+                                                }
+                                                else Console.Write(v.getValor());
+                                            }
+                                            else
+                                            {
+                                                if (v.getTipo() == Variable.t.String)
+                                                {
+                                                    Console.WriteLine(v.getValor().Substring(1, v.getValor().Length - 2));
+                                                }
+                                                else Console.WriteLine(v.getValor());
+                                            }
                                         }
                                         Match(c.Identificador);
                                     }
@@ -237,8 +251,11 @@ namespace Evalua
                 Match(c.Identificador);
                 if (existeVariable(variable))
                 {
+                    Variable v = getVariable(variable);
                     Match(c.Asignacion);
                     string valor = Asignacion(variable);
+
+                    validarTipoDato(v, valor);
 
                     if (ejecutar) setValor(variable, valor);
                     Match(c.FinSentencia);
@@ -393,8 +410,11 @@ namespace Evalua
                 string valor = "";
                 if (getClasificacion() == c.Asignacion)
                 {
+                    Variable v = new Variable(variable, tipoVariable, "", false);
                     Match(c.Asignacion);
                     valor = Asignacion(variable);
+
+                    validarTipoDato(v, valor);
                 }
 
                 if (ejecutar) variables.Add(new Variable(variable, tipoVariable, valor, false));
@@ -425,8 +445,11 @@ namespace Evalua
             Match(c.Identificador);
             if (!existeVariable(constante))
             {
+                Variable v = new Variable(constante, tipoVariable, "", true);
                 Match(c.Asignacion);
                 string valor = Asignacion(constante);
+
+                validarTipoDato(v, valor);
 
                 if (ejecutar) variables.Add(new Variable(constante, tipoVariable, valor, true));
 
@@ -459,24 +482,24 @@ namespace Evalua
                 if (getContenido() == "ReadLine")
                 {
                     Match("ReadLine");
-                    valor = Console.ReadLine();
+                    valor = "\"" + Console.ReadLine() + "\"";
                 }
                 else if (getContenido() == "Read")
                 {
                     Match("Read");
-                    valor = Convert.ToChar(Console.Read()).ToString();
+                    valor = "\"" + Convert.ToChar(Console.Read()).ToString() + "\"";
                 }
                 else
                 {
                     Match("ReadKey");
-                    valor = Console.ReadKey().KeyChar.ToString();
+                    valor = "\"" + Console.ReadKey().KeyChar.ToString() + "\"";
                 }
                 Match("(");
                 Match(")");
             }
             else if (getClasificacion() == c.Cadena)
             {
-                valor = getContenido().Substring(1, getContenido().Length - 2);
+                valor = getContenido();
                 Match(c.Cadena);
             }
             else // Expresión matemática
@@ -637,6 +660,37 @@ namespace Evalua
                 if (v.getNombre() == nombre) return v;
             }
             return null;
+        }
+
+        private void validarTipoDato(Variable v, string valor)
+        {
+            if (v.getTipo() == Variable.t.String)
+            {
+                if (!v.esCadena(valor))
+                {
+                    try
+                    {
+                        log.WriteLine(DateTime.Now.ToString("dd/MM/yy HH:mm") + " - Error de semántica en la linea " + this.actRow + " en la columna " +
+                            this.actColumn + ": La valor asignado a la variable " + v.getNombre() + " no es una cadena");
+                        throw new MyException("Error de semántica en la linea " + this.actRow + " en la columna " +
+                            this.actColumn + ": La valor asignado a la variable ### no es una cadena", v.getNombre());
+                    }
+                    finally { closeFiles(); }
+                }
+            }
+
+            Variable.t tDatoValor = tipoDatoValor(valor);
+
+            if (v.getTipo() < Variable.t.String)
+            {
+
+            }
+        }
+
+        private Variable.t tipoDatoValor(string valor)
+        {
+            if (valor.Contains(".")) return Variable.t.Float;
+            return Variable.t.String;
         }
 
         private void setValor(string nombreV, string valorV)

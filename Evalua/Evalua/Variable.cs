@@ -22,6 +22,12 @@ namespace Evalua
             this.esConst = esConst;
         }
 
+        public bool esCadena(string valor)
+        {
+            if (valor[0] == '"') return true;
+            return false;
+        }
+
         public string getValor()
         {
             return this.valor;
