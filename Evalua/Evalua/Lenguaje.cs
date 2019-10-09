@@ -12,6 +12,7 @@ namespace Evalua
         List<Variable> variables;
         List<string> funciones;
         Stack<float> evalua;
+        Variable.t tipoDataExpresion;
 
         public Lenguaje() : base()
         {
@@ -505,6 +506,7 @@ namespace Evalua
             else // Expresión matemática
             {
                 log.Write(variable + " = ");
+                tipoDataExpresion = Variable.t.Char;
                 Expresion();
                 valor = evalua.Pop().ToString();
                 log.WriteLine();
@@ -572,6 +574,8 @@ namespace Evalua
             if (getClasificacion() == c.Numero)
             {
                 log.Write(getContenido() + " ");
+                tipoDataExpresion = tipoDataExpresion < tipoDatoValor(getContenido()) ? 
+                        tipoDatoValor(getContenido()) : tipoDataExpresion;
                 evalua.Push(float.Parse(getContenido()));
                 Match(c.Numero);
             }
@@ -626,8 +630,22 @@ namespace Evalua
             else
             {
                 Match("(");
+                bool huboCasteo = false;
+                Variable.t casteo = Variable.t.String;
+                if (getClasificacion() == c.TipoDato)
+                {
+                    casteo = Variable.stringToT(getContenido());
+                    huboCasteo = true;
+                    Match(c.TipoDato);
+                    Match(")");
+                    Match("(");
+                }
                 Expresion();
                 Match(")");
+                if (huboCasteo)
+                {
+                    tipoDataExpresion = casteo;
+                }
             }
         }
 
@@ -664,6 +682,10 @@ namespace Evalua
 
         private void validarTipoDato(Variable v, string valor)
         {
+            /*Console.Write(v.getTipo() + " - ");
+            Console.Write(tipoDataExpresion + " - ");
+            Console.WriteLine(tipoDatoValor(valor));*/
+
             if (v.getTipo() == Variable.t.String)
             {
                 if (!v.esCadena(valor))
@@ -679,18 +701,38 @@ namespace Evalua
                 }
             }
 
-            Variable.t tDatoValor = tipoDatoValor(valor);
-
-            if (v.getTipo() < Variable.t.String)
+            else if (tipoDataExpresion > v.getTipo())
             {
-
+                try
+                {
+                    log.WriteLine(DateTime.Now.ToString("dd/MM/yy HH:mm") + " - Error de semántica en la linea " + this.actRow + " en la columna " +
+                        this.actColumn + ": No se puede asignar un " + tipoDataExpresion + " a la variable " + v.getNombre() + " que es de tipo " + v.getTipo());
+                    throw new MyException("Error de semántica en la linea " + this.actRow + " en la columna " +
+                        this.actColumn + ": No se puede asignar un " + tipoDataExpresion + " a la variable ### que es de tipo " + v.getTipo(), v.getNombre());
+                }
+                finally { closeFiles(); }
             }
+
+            /*else if (tipoDatoValor(valor) > v.getTipo())
+            {
+                try
+                {
+                    log.WriteLine(DateTime.Now.ToString("dd/MM/yy HH:mm") + " - Error de semántica en la linea " + this.actRow + " en la columna " +
+                        this.actColumn + ": No se puede asignar un " + tipoDatoValor(valor) + " a la variable " + v.getNombre() + " que es de tipo " + v.getTipo());
+                    throw new MyException("Error de semántica en la linea " + this.actRow + " en la columna " +
+                        this.actColumn + ": No se puede asignar un " + tipoDatoValor(valor) + " a la variable ### que es de tipo " + v.getTipo(), v.getNombre());
+                }
+                finally { closeFiles(); }
+            }*/
         }
 
         private Variable.t tipoDatoValor(string valor)
         {
-            if (valor.Contains(".")) return Variable.t.Float;
-            return Variable.t.String;
+            if (valor[0] == '\"') return Variable.t.String;
+            else if (valor.Contains(".")) return Variable.t.Float;
+            else if (float.Parse(valor) < 256) return Variable.t.Char;
+            else if (float.Parse(valor) < 65536) return Variable.t.Int;
+            else return Variable.t.Float;
         }
 
         private void setValor(string nombreV, string valorV)
