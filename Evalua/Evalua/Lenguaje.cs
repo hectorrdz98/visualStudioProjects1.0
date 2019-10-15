@@ -14,6 +14,9 @@ namespace Evalua
         Stack<float> evalua;
         Variable.t tipoDataExpresion;
 
+        int contIf = 0;
+        int contFor = 0;
+
         public Lenguaje() : base()
         {
             variables = new List<Variable>();
@@ -30,8 +33,20 @@ namespace Evalua
         public void Programa()
         {
             Librerias();
+
+            asm.WriteLine("\ninclude \"emu8086.inc\"\n");
+
             Main();
+
+            asm.WriteLine("\nint 21h");
+            asm.WriteLine("ret\n");
+
             imprimeVariables();
+
+            asm.WriteLine("\ndefine_scan_num");
+            asm.WriteLine("define_print_num");
+            asm.WriteLine("define_print_num_uns");
+            asm.WriteLine("end");
         }
 
         private void Librerias()
@@ -70,6 +85,7 @@ namespace Evalua
 
         private void Main()
         {
+            asm.WriteLine(".code");
             Match("namespace");
             Match(c.Identificador);
             Match(c.InicioBloque);
@@ -138,11 +154,17 @@ namespace Evalua
                             Match("(");
                             if (getClasificacion() == c.Cadena)
                             {
-                                if (ejecutar)
+                                if (typeOutput == "Write")
                                 {
-                                    string output = getContenido();
-                                    if (typeOutput == "Write") Console.Write(output.Substring(1, output.Length - 2));
-                                    else Console.WriteLine(output.Substring(1, output.Length - 2));
+                                    if (ejecutar)
+                                        Console.Write(getContenido().Substring(1, getContenido().Length - 2));
+                                    asm.WriteLine("print " + getContenido());
+                                }
+                                else
+                                {
+                                    if (ejecutar)
+                                        Console.WriteLine(getContenido().Substring(1, getContenido().Length - 2));
+                                    asm.WriteLine("printn " + getContenido());
                                 }
                                 Match(c.Cadena);
                             }
@@ -152,24 +174,38 @@ namespace Evalua
                                 {
                                     if (existeVariable(getContenido()))
                                     {
-                                        if (ejecutar)
+                                        Variable v = getVariable(getContenido());
+                                        if (typeOutput == "Write")
                                         {
-                                            Variable v = getVariable(getContenido());
-                                            if (typeOutput == "Write")
+                                            if (v.getTipo() == Variable.t.String)
                                             {
-                                                if (v.getTipo() == Variable.t.String)
-                                                {
+                                                if (ejecutar)
                                                     Console.Write(v.getValor().Substring(1, v.getValor().Length - 2));
-                                                }
-                                                else Console.Write(v.getValor());
+                                                asm.WriteLine("print " + v.getValor());
                                             }
                                             else
                                             {
-                                                if (v.getTipo() == Variable.t.String)
-                                                {
+                                                if (ejecutar)
+                                                    Console.Write(v.getValor());
+                                                asm.WriteLine("mov ax," + v.getNombre());
+                                                asm.WriteLine("call print_num");
+                                            }
+                                        }
+                                        else
+                                        {
+                                            if (v.getTipo() == Variable.t.String)
+                                            {
+                                                if (ejecutar)
                                                     Console.WriteLine(v.getValor().Substring(1, v.getValor().Length - 2));
-                                                }
-                                                else Console.WriteLine(v.getValor());
+                                                asm.WriteLine("printn " + v.getValor());
+                                            }
+                                            else
+                                            {
+                                                if (ejecutar)
+                                                    Console.WriteLine(v.getValor());
+                                                asm.WriteLine("mov ax," + v.getNombre());
+                                                asm.WriteLine("call print_num");
+                                                asm.WriteLine("printn ''");
                                             }
                                         }
                                         Match(c.Identificador);
@@ -291,6 +327,9 @@ namespace Evalua
             bool ejecutar = Condicion() && ejecutarPre;
             Match(")");
 
+            int contIfTmp = contIf;
+            contIf++;
+
             if (getClasificacion() == c.InicioBloque)
             {
                 BloqueDeInstrucciones(ejecutar);
@@ -299,6 +338,9 @@ namespace Evalua
             {
                 Instruccion(ejecutar);
             }
+
+            asm.WriteLine("if" + contIfTmp + ":");
+            
 
             if (getContenido() == "else")
             {
@@ -324,6 +366,7 @@ namespace Evalua
             Match("(");
             Expresion();
 
+            asm.WriteLine("pop ax");
             int nRep = (int) Math.Truncate(evalua.Pop());
             long position = archivo.Position;
             int saveActRow = actRow;
@@ -362,21 +405,47 @@ namespace Evalua
             if (getContenido() == "!") { Match(getContenido()); not = true; }
 
             Expresion();
+
+            asm.WriteLine("pop cx");
             float elem1 = evalua.Pop();
+
             string operador = getContenido();
             Match(c.OperadorRelacional);
+
             Expresion();
+
+            asm.WriteLine("pop dx");
             float elem2 = evalua.Pop();
+
+            asm.WriteLine("cmp cx,dx");
 
             bool preRes;
             switch (operador)
             {
-                case "==": preRes = elem1 == elem2; break;
-                case "!=": preRes = elem1 != elem2; break;
-                case ">": preRes = elem1 > elem2; break;
-                case ">=": preRes = elem1 >= elem2; break;
-                case "<": preRes = elem1 < elem2; break;
-                default: preRes = elem1 <= elem2; break;
+                case "==":
+                    asm.WriteLine("jne if" + contIf);
+                    preRes = elem1 == elem2;
+                    break;
+                case "!=":
+                    asm.WriteLine("je if" + contIf);
+                    preRes = elem1 != elem2;
+                    break;
+                case ">":
+                    asm.WriteLine("jle if" + contIf);
+                    preRes = elem1 > elem2;
+                    break;
+                case ">=":
+                    asm.WriteLine("jl if" + contIf);
+                    preRes = elem1 >= elem2;
+                    break;
+                case "<":
+                    asm.WriteLine("jge if" + contIf);
+                    preRes = elem1 < elem2;
+                    break;
+                default:
+                    asm.WriteLine("jg if" + contIf);
+                    preRes = elem1 <= elem2;
+                    break;
             }
 
             if (not) preRes = !preRes;
@@ -506,8 +575,11 @@ namespace Evalua
             else // Expresión matemática
             {
                 log.Write(variable + " = ");
+                asm.Write("\n;" + variable + " = \n");
                 tipoDataExpresion = Variable.t.Char;
                 Expresion();
+                asm.WriteLine("pop ax");
+                asm.WriteLine("mov " + variable + ",ax");
                 valor = evalua.Pop().ToString();
                 log.WriteLine();
                 log.WriteLine(variable + " = " + valor);
@@ -537,12 +609,22 @@ namespace Evalua
                 log.Write(operador + " ");
 
                 float t1 = evalua.Pop();
+                asm.WriteLine("pop bx");
                 float t2 = evalua.Pop();
+                asm.WriteLine("pop ax");
 
                 switch (operador)
                 {
-                    case "+": evalua.Push(t2 + t1); break;
-                    case "-": evalua.Push(t2 - t1); break;
+                    case "+":
+                        asm.WriteLine("add ax,bx");
+                        evalua.Push(t2 + t1);
+                        asm.WriteLine("push ax");
+                        break;
+                    case "-":
+                        asm.WriteLine("sub ax,bx");
+                        evalua.Push(t2 - t1);
+                        asm.WriteLine("push ax");
+                        break;
                 }
             }
         }
@@ -557,13 +639,27 @@ namespace Evalua
                 log.Write(operador + " ");
 
                 float t1 = evalua.Pop();
+                asm.WriteLine("pop bx");
                 float t2 = evalua.Pop();
+                asm.WriteLine("pop ax");
 
                 switch (operador)
                 {
-                    case "*": evalua.Push(t2 * t1); break;
-                    case "/": evalua.Push(t2 / t1); break;
-                    case "%": evalua.Push(t2 % t1); break;
+                    case "*":
+                        asm.WriteLine("mul bx");
+                        evalua.Push(t2 * t1);
+                        asm.WriteLine("push ax");
+                        break;
+                    case "/":
+                        asm.WriteLine("div bx");
+                        evalua.Push(t2 / t1);
+                        asm.WriteLine("push ax");
+                        break;
+                    case "%":
+                        asm.WriteLine("div bx");
+                        evalua.Push(t2 % t1);
+                        asm.WriteLine("push dx");
+                        break;
                 }
 
             }
@@ -577,6 +673,8 @@ namespace Evalua
                 tipoDataExpresion = tipoDataExpresion < tipoDatoValor(getContenido()) ? 
                         tipoDatoValor(getContenido()) : tipoDataExpresion;
                 evalua.Push(float.Parse(getContenido()));
+                asm.WriteLine("mov ax," + getContenido());
+                asm.WriteLine("push ax");
                 Match(c.Numero);
             }
             else if (getClasificacion() == c.Funcion)
@@ -592,7 +690,13 @@ namespace Evalua
                     log.Write(funcion + " ");
                     //Funcion f = getFuncion(funcion);
                     //evalua.Push(f.func(evalua.Pop()));
-                    evalua.Push(Funcion(funcion, evalua.Pop()));
+
+                    asm.WriteLine("pop ax");
+                    float value = Funcion(funcion, evalua.Pop());
+
+                    evalua.Push(value);
+                    asm.WriteLine("mov ax," + value);
+                    asm.WriteLine("push ax");
                 }
                 else
                 {
@@ -613,6 +717,10 @@ namespace Evalua
                 {
                     log.Write(getContenido() + " ");
                     evalua.Push(float.Parse(getValor(getContenido())));
+
+                    asm.WriteLine("mov ax," + getValor(getContenido()));
+                    asm.WriteLine("push ax");
+
                     Match(c.Identificador);
                 }
                 else
@@ -770,6 +878,8 @@ namespace Evalua
                 log.WriteLine("Tipo: " + v.getTipo());
                 log.WriteLine("Valor: " + v.getValor());
                 log.WriteLine(v.esVariable() ? "Es variable" : "Es constante");
+
+                asm.WriteLine(v.getNombre() + " dw ?");
             }
         }
     }

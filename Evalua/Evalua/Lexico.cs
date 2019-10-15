@@ -12,6 +12,8 @@ namespace Evalua
         public FileStream archivo;
         protected StreamWriter log;
 
+        protected StreamWriter asm;
+
         private const int f = -1;
         private const int e = -2;
         protected int actRow = 1;
@@ -74,6 +76,7 @@ namespace Evalua
             // archivo = new StreamReader(filePath);
             // archivo = File.OpenRead(filePath);
             archivo = new FileStream(filePath, FileMode.Open, FileAccess.Read);
+            asm = new StreamWriter("C:\\archivos\\prueba.asm");
         }
 
         public Lexico(string filePath)
@@ -106,6 +109,11 @@ namespace Evalua
             // archivo = new StreamReader(filePath);
             // archivo = File.OpenRead(filePath);
             archivo = new FileStream(filePath, FileMode.Open, FileAccess.Read);
+
+            asm = new StreamWriter(Path.GetDirectoryName(filePath) + "\\" + Path.GetFileNameWithoutExtension(filePath) + ".asm");
+            asm.WriteLine(";Nombre del programa: " + Path.GetFileNameWithoutExtension(filePath) + ".asm");
+            asm.WriteLine(";Path: " + Path.GetDirectoryName(filePath));
+            asm.WriteLine(";Fecha: " + DateTime.Now.ToString("dd/MM/yy"));
         }
 
         ~Lexico()
@@ -125,6 +133,7 @@ namespace Evalua
             compilationToLog("ended");
             if (archivo != null) archivo.Close();
             log.Close();
+            asm.Close();
         }
 
         private int getColumna(char transicion)
