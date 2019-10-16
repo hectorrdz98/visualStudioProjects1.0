@@ -294,6 +294,18 @@ namespace Evalua
 
                     validarTipoDato(v, valor);
 
+                    if (v.esConst)
+                    {
+                        try
+                        {
+                            log.WriteLine(DateTime.Now.ToString("dd/MM/yy HH:mm") + " - Error de semántica en la linea " + this.actRow + " en la columna " +
+                                this.actColumn + ": La constante " + v.getNombre() + " no se puede modificar");
+                            throw new MyException("Error de semántica en la linea " + this.actRow + " en la columna " +
+                                this.actColumn + ": La constante ### no se puede modificar", v.getNombre());
+                        }
+                        finally { closeFiles(); }
+                    }
+
                     if (ejecutar) setValor(variable, valor);
                     Match(c.FinSentencia);
                 }
@@ -679,7 +691,6 @@ namespace Evalua
             }
             else if (getClasificacion() == c.Funcion)
             {
-                //if (existeFuncion(getContenido()))
                 if (funciones.Contains(getContenido()))
                 {
                     string funcion = getContenido();
@@ -688,11 +699,13 @@ namespace Evalua
                     Expresion();
                     Match(")");
                     log.Write(funcion + " ");
-                    //Funcion f = getFuncion(funcion);
-                    //evalua.Push(f.func(evalua.Pop()));
 
                     asm.WriteLine("pop ax");
+
                     float value = Funcion(funcion, evalua.Pop());
+
+                    Variable.t tipoDatoFunction = tipoDatoValor(value.ToString());
+                    tipoDataExpresion = tipoDatoFunction;
 
                     evalua.Push(value);
                     asm.WriteLine("mov ax," + value);
@@ -715,6 +728,10 @@ namespace Evalua
             {
                 if (existeVariable(getContenido()))
                 {
+                    Variable v = getVariable(getContenido());
+                    tipoDataExpresion = tipoDataExpresion < v.getTipo() ?
+                        v.getTipo() : tipoDataExpresion;
+
                     log.Write(getContenido() + " ");
                     evalua.Push(float.Parse(getValor(getContenido())));
 
@@ -752,6 +769,9 @@ namespace Evalua
                 Match(")");
                 if (huboCasteo)
                 {
+                    string valor = evalua.Pop().ToString();
+                    string valorCasteado = evaluaCasteo(valor, casteo);
+                    evalua.Push(float.Parse(valorCasteado));
                     tipoDataExpresion = casteo;
                 }
             }
@@ -790,10 +810,6 @@ namespace Evalua
 
         private void validarTipoDato(Variable v, string valor)
         {
-            /*Console.Write(v.getTipo() + " - ");
-            Console.Write(tipoDataExpresion + " - ");
-            Console.WriteLine(tipoDatoValor(valor));*/
-
             if (v.getTipo() == Variable.t.String)
             {
                 if (!v.esCadena(valor))
@@ -820,27 +836,43 @@ namespace Evalua
                 }
                 finally { closeFiles(); }
             }
-
-            /*else if (tipoDatoValor(valor) > v.getTipo())
-            {
-                try
-                {
-                    log.WriteLine(DateTime.Now.ToString("dd/MM/yy HH:mm") + " - Error de semántica en la linea " + this.actRow + " en la columna " +
-                        this.actColumn + ": No se puede asignar un " + tipoDatoValor(valor) + " a la variable " + v.getNombre() + " que es de tipo " + v.getTipo());
-                    throw new MyException("Error de semántica en la linea " + this.actRow + " en la columna " +
-                        this.actColumn + ": No se puede asignar un " + tipoDatoValor(valor) + " a la variable ### que es de tipo " + v.getTipo(), v.getNombre());
-                }
-                finally { closeFiles(); }
-            }*/
         }
 
         private Variable.t tipoDatoValor(string valor)
         {
             if (valor[0] == '\"') return Variable.t.String;
-            else if (valor.Contains(".")) return Variable.t.Float;
+            else if (valor.Contains("."))
+            {
+                try
+                {
+                    float.Parse(valor);
+                    return Variable.t.Float;
+                }
+                catch (Exception e) { return Variable.t.Double; }
+            }
             else if (float.Parse(valor) < 256) return Variable.t.Char;
             else if (float.Parse(valor) < 65536) return Variable.t.Int;
-            else return Variable.t.Float;
+            else return Variable.t.Double;
+        }
+
+        private string evaluaCasteo(string valor, Variable.t tipoD)
+        {
+            int val;
+            switch (tipoD)
+            {
+                case Variable.t.Char:
+                    val = (int) Math.Truncate(float.Parse(valor));
+                    if (val < 256) return val.ToString();
+                    return (val % 256).ToString();
+                case Variable.t.Int:
+                    val = (int) Math.Truncate(float.Parse(valor));
+                    if (val < 65536) return val.ToString();
+                    return (val % 65536).ToString();
+                case Variable.t.Float:
+                case Variable.t.Double:
+                default:
+                    return valor;
+            }
         }
 
         private void setValor(string nombreV, string valorV)

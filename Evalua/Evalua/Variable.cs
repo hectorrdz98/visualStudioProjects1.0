@@ -12,7 +12,7 @@ namespace Evalua
         private string nombre;
         private t tipo;
         private string valor;
-        private bool esConst;
+        public bool esConst;
 
         public Variable(string nombre, t tipo, string valor, bool esConst)
         {
