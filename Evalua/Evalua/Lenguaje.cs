@@ -11,7 +11,7 @@ namespace Evalua
     {
         List<Variable> variables;
         List<string> funciones;
-        Stack<float> evalua;
+        Stack<double> evalua;
         Variable.t tipoDataExpresion;
 
         int contIf = 0;
@@ -21,13 +21,13 @@ namespace Evalua
         {
             variables = new List<Variable>();
             funciones = new List<string>();
-            evalua = new Stack<float>();
+            evalua = new Stack<double>();
         }
         public Lenguaje(string filePath) : base(filePath)
         {
             variables = new List<Variable>();
             funciones = new List<string>();
-            evalua = new Stack<float>();
+            evalua = new Stack<double>();
         }
 
         public void Programa()
@@ -263,7 +263,7 @@ namespace Evalua
             {
                 Variable.t tipoVariable = Variable.stringToT(getContenido());
                 Match(c.TipoDato);
-                ListaDeIdentificadores(tipoVariable, ejecutar);
+                ListaDeIdentificadores(tipoVariable);
                 Match(c.FinSentencia);
             }
             else if (getClasificacion() == c.Constante)
@@ -271,7 +271,7 @@ namespace Evalua
                 Match(c.Constante);
                 Variable.t tipoVariable = Variable.stringToT(getContenido());
                 Match(c.TipoDato);
-                ListaDeConstantes(tipoVariable, ejecutar);
+                ListaDeConstantes(tipoVariable);
                 Match(c.FinSentencia);
             }
             else if (getClasificacion() == c.If)
@@ -373,18 +373,22 @@ namespace Evalua
 
         private void ForEach(bool ejecutar)
         {
-            log.Write("IF: ");
+            log.Write("Foreach: ");
             Match(c.ForEach);
             Match("(");
             Expresion();
 
             asm.WriteLine("pop ax");
-            int nRep = (int) Math.Truncate(evalua.Pop());
+            int nRep = (int)Math.Truncate(evalua.Pop()); //Req #6
             long position = archivo.Position;
             int saveActRow = actRow;
             int saveActCol = actColumn;
 
             Match(")");
+
+            int contForTmp = contFor;
+            asm.WriteLine("for" + contForTmp + ":");
+            contFor++;
 
             if (getClasificacion() == c.InicioBloque)
             {
@@ -408,6 +412,8 @@ namespace Evalua
                 }
             }
 
+            asm.WriteLine(";regresar a for" + contForTmp);
+
             log.WriteLine();
         }
 
@@ -419,7 +425,7 @@ namespace Evalua
             Expresion();
 
             asm.WriteLine("pop cx");
-            float elem1 = evalua.Pop();
+            double elem1 = evalua.Pop();
 
             string operador = getContenido();
             Match(c.OperadorRelacional);
@@ -427,8 +433,9 @@ namespace Evalua
             Expresion();
 
             asm.WriteLine("pop dx");
-            float elem2 = evalua.Pop();
+            double elem2 = evalua.Pop();
 
+            asm.WriteLine("\n;if" + contIf + " " + operador);
             asm.WriteLine("cmp cx,dx");
 
             bool preRes;
@@ -483,7 +490,7 @@ namespace Evalua
             return preRes;
         }
 
-        private void ListaDeIdentificadores(Variable.t tipoVariable, bool ejecutar)
+        private void ListaDeIdentificadores(Variable.t tipoVariable)
         {
             string variable = getContenido();
             Match(c.Identificador);
@@ -499,12 +506,12 @@ namespace Evalua
                     validarTipoDato(v, valor);
                 }
 
-                if (ejecutar) variables.Add(new Variable(variable, tipoVariable, valor, false));
+                variables.Add(new Variable(variable, tipoVariable, valor, false));
 
                 if (getContenido() == ",")
                 {
                     Match(",");
-                    ListaDeIdentificadores(tipoVariable, ejecutar);
+                    ListaDeIdentificadores(tipoVariable);
                 }
             }
             else
@@ -521,7 +528,7 @@ namespace Evalua
             
         }
 
-        private void ListaDeConstantes(Variable.t tipoVariable, bool ejecutar)
+        private void ListaDeConstantes(Variable.t tipoVariable)
         {
             string constante = getContenido();
             Match(c.Identificador);
@@ -533,12 +540,12 @@ namespace Evalua
 
                 validarTipoDato(v, valor);
 
-                if (ejecutar) variables.Add(new Variable(constante, tipoVariable, valor, true));
+                variables.Add(new Variable(constante, tipoVariable, valor, true));
 
                 if (getContenido() == ",")
                 {
                     Match(",");
-                    ListaDeConstantes(tipoVariable, ejecutar);
+                    ListaDeConstantes(tipoVariable);
                 }
             }
             else
@@ -620,9 +627,9 @@ namespace Evalua
                 Termino();
                 log.Write(operador + " ");
 
-                float t1 = evalua.Pop();
+                double t1 = evalua.Pop();
                 asm.WriteLine("pop bx");
-                float t2 = evalua.Pop();
+                double t2 = evalua.Pop();
                 asm.WriteLine("pop ax");
 
                 switch (operador)
@@ -650,9 +657,9 @@ namespace Evalua
                 Factor();
                 log.Write(operador + " ");
 
-                float t1 = evalua.Pop();
+                double t1 = evalua.Pop();
                 asm.WriteLine("pop bx");
-                float t2 = evalua.Pop();
+                double t2 = evalua.Pop();
                 asm.WriteLine("pop ax");
 
                 switch (operador)
@@ -684,7 +691,7 @@ namespace Evalua
                 log.Write(getContenido() + " ");
                 tipoDataExpresion = tipoDataExpresion < tipoDatoValor(getContenido()) ? 
                         tipoDatoValor(getContenido()) : tipoDataExpresion;
-                evalua.Push(float.Parse(getContenido()));
+                evalua.Push(double.Parse(getContenido()));
                 asm.WriteLine("mov ax," + getContenido());
                 asm.WriteLine("push ax");
                 Match(c.Numero);
@@ -702,7 +709,7 @@ namespace Evalua
 
                     asm.WriteLine("pop ax");
 
-                    float value = Funcion(funcion, evalua.Pop());
+                    double value = Funcion(funcion, evalua.Pop());
 
                     Variable.t tipoDatoFunction = tipoDatoValor(value.ToString());
                     tipoDataExpresion = tipoDatoFunction;
@@ -733,7 +740,7 @@ namespace Evalua
                         v.getTipo() : tipoDataExpresion;
 
                     log.Write(getContenido() + " ");
-                    evalua.Push(float.Parse(getValor(getContenido())));
+                    evalua.Push(double.Parse(getValor(getContenido())));
 
                     asm.WriteLine("mov ax," + getValor(getContenido()));
                     asm.WriteLine("push ax");
@@ -771,21 +778,21 @@ namespace Evalua
                 {
                     string valor = evalua.Pop().ToString();
                     string valorCasteado = evaluaCasteo(valor, casteo);
-                    evalua.Push(float.Parse(valorCasteado));
+                    evalua.Push(double.Parse(valorCasteado));
                     tipoDataExpresion = casteo;
                 }
             }
         }
 
-        private float Funcion(string nombre, float n)
+        private double Funcion(string nombre, double n)
         {
             switch (nombre)
             {
                 case "abs": return Math.Abs(n);
-                case "sqrt": return (float) Math.Sqrt(n);
+                case "sqrt": return (double) Math.Sqrt(n);
                 case "pow2": return n * n;
-                case "round": return (float) Math.Round(n);
-                case "trunc": return (float) Math.Truncate(n);
+                case "round": return (double) Math.Round(n);
+                case "trunc": return (double) Math.Truncate(n);
             }
             return n;
         }
@@ -843,15 +850,10 @@ namespace Evalua
             if (valor[0] == '\"') return Variable.t.String;
             else if (valor.Contains("."))
             {
-                try
-                {
-                    float.Parse(valor);
-                    return Variable.t.Float;
-                }
-                catch (Exception e) { return Variable.t.Double; }
+                return Variable.t.Float;
             }
-            else if (float.Parse(valor) < 256) return Variable.t.Char;
-            else if (float.Parse(valor) < 65536) return Variable.t.Int;
+            else if (double.Parse(valor) < 256) return Variable.t.Char;
+            else if (double.Parse(valor) < 65536) return Variable.t.Int;
             else return Variable.t.Double;
         }
 
@@ -861,11 +863,11 @@ namespace Evalua
             switch (tipoD)
             {
                 case Variable.t.Char:
-                    val = (int) Math.Truncate(float.Parse(valor));
+                    val = (int) Math.Truncate(double.Parse(valor));
                     if (val < 256) return val.ToString();
                     return (val % 256).ToString();
                 case Variable.t.Int:
-                    val = (int) Math.Truncate(float.Parse(valor));
+                    val = (int) Math.Truncate(double.Parse(valor));
                     if (val < 65536) return val.ToString();
                     return (val % 65536).ToString();
                 case Variable.t.Float:
