@@ -235,11 +235,22 @@ namespace Evalua
                         {
                             string typeInput = getContenido();
                             Match(getContenido());
-                            if (ejecutar)
+                            asm.WriteLine("call scan_num");
+                            if (typeInput == "ReadLine")
                             {
-                                if (typeInput == "ReadLine") Console.ReadLine();
-                                else if (typeInput == "Read") Console.Read();
-                                else Console.ReadKey();
+                                if (ejecutar)
+                                    Console.ReadLine();
+                                asm.WriteLine("printn ''");
+                            }
+                            else if (typeInput == "Read")
+                            {
+                                if (ejecutar)
+                                    Console.Read();
+                            }
+                            else
+                            {
+                                if (ejecutar)
+                                    Console.ReadKey();
                             }
                             Match("(");
                             Match(")");
@@ -291,6 +302,11 @@ namespace Evalua
                     Variable v = getVariable(variable);
                     Match(c.Asignacion);
                     string valor = Asignacion(variable);
+
+                    if (v.getTipo() == Variable.t.String && !v.esCadena(valor) && tipoDataExpresion == Variable.t.String)
+                    {
+                        valor = "\"" + valor + "\"";
+                    }
 
                     validarTipoDato(v, valor);
 
@@ -351,7 +367,8 @@ namespace Evalua
                 Instruccion(ejecutar);
             }
 
-            asm.WriteLine("if" + contIfTmp + ":");
+            asm.WriteLine("jmp endif" + contIfTmp);
+            asm.WriteLine("else" + contIfTmp + ":");
             
 
             if (getContenido() == "else")
@@ -360,13 +377,15 @@ namespace Evalua
                 Match("else");
                 if (getClasificacion() == c.InicioBloque)
                 {
-                    BloqueDeInstrucciones(!ejecutar);
+                    BloqueDeInstrucciones(!ejecutar && ejecutarPre);
                 }
                 else
                 {
-                    Instruccion(!ejecutar);
+                    Instruccion(!ejecutar && ejecutarPre);
                 }
             }
+
+            asm.WriteLine("endif" + contIfTmp + ":");
 
             log.WriteLine();
         }
@@ -378,8 +397,22 @@ namespace Evalua
             Match("(");
             Expresion();
 
+            int nRep = 0;
             asm.WriteLine("pop ax");
-            int nRep = (int)Math.Truncate(evalua.Pop()); //Req #6
+            double nRepTemp = evalua.Pop();
+            Variable.t tipoDatoNRep = tipoDatoValor(nRepTemp.ToString());
+            if (tipoDatoNRep == Variable.t.Int || tipoDatoNRep == Variable.t.Char) nRep = (int)nRepTemp;
+            else
+            {
+                try
+                {
+                    log.WriteLine(DateTime.Now.ToString("dd/MM/yy HH:mm") + " - Error de semántica en la linea " + this.actRow + " en la columna " +
+                        this.actColumn + ": El número de repeticiones en el ciclo no es válido");
+                    throw new MyException("Error de semántica en la linea " + this.actRow + " en la columna " +
+                        this.actColumn + ": El número de repeticiones en el ciclo no es válido");
+                }
+                finally { closeFiles(); }
+            }
             long position = archivo.Position;
             int saveActRow = actRow;
             int saveActCol = actColumn;
@@ -442,27 +475,27 @@ namespace Evalua
             switch (operador)
             {
                 case "==":
-                    asm.WriteLine("jne if" + contIf);
+                    asm.WriteLine("jne else" + contIf);
                     preRes = elem1 == elem2;
                     break;
                 case "!=":
-                    asm.WriteLine("je if" + contIf);
+                    asm.WriteLine("je else" + contIf);
                     preRes = elem1 != elem2;
                     break;
                 case ">":
-                    asm.WriteLine("jle if" + contIf);
+                    asm.WriteLine("jle else" + contIf);
                     preRes = elem1 > elem2;
                     break;
                 case ">=":
-                    asm.WriteLine("jl if" + contIf);
+                    asm.WriteLine("jl else" + contIf);
                     preRes = elem1 >= elem2;
                     break;
                 case "<":
-                    asm.WriteLine("jge if" + contIf);
+                    asm.WriteLine("jge else" + contIf);
                     preRes = elem1 < elem2;
                     break;
                 default:
-                    asm.WriteLine("jg if" + contIf);
+                    asm.WriteLine("jg else" + contIf);
                     preRes = elem1 <= elem2;
                     break;
             }
@@ -503,6 +536,11 @@ namespace Evalua
                     Match(c.Asignacion);
                     valor = Asignacion(variable);
 
+                    if (v.getTipo() == Variable.t.String && !v.esCadena(valor) && tipoDataExpresion == Variable.t.String)
+                    {
+                        valor = "\"" + valor + "\"";
+                    }
+
                     validarTipoDato(v, valor);
                 }
 
@@ -538,6 +576,11 @@ namespace Evalua
                 Match(c.Asignacion);
                 string valor = Asignacion(constante);
 
+                if (v.getTipo() == Variable.t.String && !v.esCadena(valor) && tipoDataExpresion == Variable.t.String)
+                {
+                    valor = "\"" + valor + "\"";
+                }
+
                 validarTipoDato(v, valor);
 
                 variables.Add(new Variable(constante, tipoVariable, valor, true));
@@ -566,12 +609,15 @@ namespace Evalua
             string valor = "";
             if (getContenido() == "Console")
             {
+                tipoDataExpresion = Variable.t.String;
                 Match("Console");
                 Match(".");
+                asm.WriteLine("call scan_num");
                 if (getContenido() == "ReadLine")
                 {
                     Match("ReadLine");
                     valor = "\"" + Console.ReadLine() + "\"";
+                    asm.WriteLine("printn ''");
                 }
                 else if (getContenido() == "Read")
                 {
@@ -583,11 +629,13 @@ namespace Evalua
                     Match("ReadKey");
                     valor = "\"" + Console.ReadKey().KeyChar.ToString() + "\"";
                 }
+                asm.WriteLine("mov " + variable + ",cx");
                 Match("(");
                 Match(")");
             }
             else if (getClasificacion() == c.Cadena)
             {
+                tipoDataExpresion = Variable.t.String;
                 valor = getContenido();
                 Match(c.Cadena);
             }
@@ -739,10 +787,14 @@ namespace Evalua
                     tipoDataExpresion = tipoDataExpresion < v.getTipo() ?
                         v.getTipo() : tipoDataExpresion;
 
-                    log.Write(getContenido() + " ");
-                    evalua.Push(double.Parse(getValor(getContenido())));
+                    Console.WriteLine("tipoDataExpresion: " + tipoDataExpresion.ToString());
 
-                    asm.WriteLine("mov ax," + getValor(getContenido()));
+                    log.Write(getContenido() + " ");
+                    string variableValue = getValor(getContenido());
+                    if (v.esCadena(variableValue)) evalua.Push(double.Parse(variableValue.Substring(1, variableValue.Length - 2)));
+                    else evalua.Push(double.Parse(variableValue));
+
+                    asm.WriteLine("mov ax," + getContenido());
                     asm.WriteLine("push ax");
 
                     Match(c.Identificador);
@@ -767,6 +819,7 @@ namespace Evalua
                 if (getClasificacion() == c.TipoDato)
                 {
                     casteo = Variable.stringToT(getContenido());
+                    if (casteo == Variable.t.String) tipoDataExpresion = casteo;
                     huboCasteo = true;
                     Match(c.TipoDato);
                     Match(")");
@@ -850,11 +903,17 @@ namespace Evalua
             if (valor[0] == '\"') return Variable.t.String;
             else if (valor.Contains("."))
             {
-                return Variable.t.Float;
+                try
+                {
+                    float.Parse(valor);
+                    return Variable.t.Float;
+                }
+                catch { return Variable.t.Double; }
+                
             }
             else if (double.Parse(valor) < 256) return Variable.t.Char;
             else if (double.Parse(valor) < 65536) return Variable.t.Int;
-            else return Variable.t.Double;
+            else return Variable.t.String;
         }
 
         private string evaluaCasteo(string valor, Variable.t tipoD)
@@ -871,6 +930,12 @@ namespace Evalua
                     if (val < 65536) return val.ToString();
                     return (val % 65536).ToString();
                 case Variable.t.Float:
+                    double val2 = double.Parse(valor);
+                    if (val2 > 3.4E38)
+                    {
+                        return (val2 % 3.4E38).ToString();
+                    }
+                    return val2.ToString();
                 case Variable.t.Double:
                 default:
                     return valor;

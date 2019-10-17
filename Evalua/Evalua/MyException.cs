@@ -28,8 +28,6 @@ namespace Evalua
             int init = message.IndexOf("###");
             bool flag = false;
 
-            Console.WriteLine(init);
-
             message = message.Replace("###", "");
 
             Console.ForegroundColor = ConsoleColor.Red;
