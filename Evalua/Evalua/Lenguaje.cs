@@ -787,11 +787,9 @@ namespace Evalua
                     tipoDataExpresion = tipoDataExpresion < v.getTipo() ?
                         v.getTipo() : tipoDataExpresion;
 
-                    Console.WriteLine("tipoDataExpresion: " + tipoDataExpresion.ToString());
-
                     log.Write(getContenido() + " ");
                     string variableValue = getValor(getContenido());
-                    if (v.esCadena(variableValue)) evalua.Push(double.Parse(variableValue.Substring(1, variableValue.Length - 2)));
+                    if (v.esCadena(variableValue)) pushStringNoQuotes(v, variableValue);
                     else evalua.Push(double.Parse(variableValue));
 
                     asm.WriteLine("mov ax," + getContenido());
@@ -819,7 +817,7 @@ namespace Evalua
                 if (getClasificacion() == c.TipoDato)
                 {
                     casteo = Variable.stringToT(getContenido());
-                    if (casteo == Variable.t.String) tipoDataExpresion = casteo;
+                    //if (casteo == Variable.t.String) tipoDataExpresion = casteo;
                     huboCasteo = true;
                     Match(c.TipoDato);
                     Match(")");
@@ -831,7 +829,7 @@ namespace Evalua
                 {
                     string valor = evalua.Pop().ToString();
                     string valorCasteado = evaluaCasteo(valor, casteo);
-                    evalua.Push(double.Parse(valorCasteado));
+                    pushStringNoQuotes(valorCasteado);
                     tipoDataExpresion = casteo;
                 }
             }
@@ -839,6 +837,17 @@ namespace Evalua
 
         private double Funcion(string nombre, double n)
         {
+            if (tipoDataExpresion == Variable.t.String)
+            {
+                try
+                {
+                    log.WriteLine(DateTime.Now.ToString("dd/MM/yy HH:mm") + " - Error de semántica en la linea " + this.actRow + " en la columna " +
+                        this.actColumn + ": Tipo de dato invalido en llamada a función " + nombre);
+                    throw new MyException("Error de semántica en la linea " + this.actRow + " en la columna " +
+                        this.actColumn + ": Tipo de dato invalido en llamada a función ###", nombre);
+                }
+                finally { closeFiles(); }
+            }
             switch (nombre)
             {
                 case "abs": return Math.Abs(n);
@@ -849,6 +858,58 @@ namespace Evalua
             }
             return n;
         }
+
+        private void pushStringNoQuotes(Variable v, string variableValue)
+        {
+            if (variableValue[0] == '"')
+            {
+                try
+                {
+                    evalua.Push(double.Parse(variableValue.Substring(1, variableValue.Length - 2)));
+                }
+                catch
+                {
+                    try
+                    {
+                        log.WriteLine(DateTime.Now.ToString("dd/MM/yy HH:mm") + " - Error de semántica en la linea " + this.actRow + " en la columna " +
+                            this.actColumn + ": Operación con variable " + v.getNombre() + " de tipo string no valida");
+                        throw new MyException("Error de semántica en la linea " + this.actRow + " en la columna " +
+                            this.actColumn + ": Operación con variable ### de tipo string no valida ", v.getNombre());
+                    }
+                    finally { closeFiles(); }
+                }
+            }
+            else
+            {
+                evalua.Push(double.Parse(variableValue));
+            }
+        }
+
+        private void pushStringNoQuotes(string variableValue)
+        {
+            if (variableValue[0] == '"')
+            {
+                try
+                {
+                    evalua.Push(double.Parse(variableValue.Substring(1, variableValue.Length - 2)));
+                }
+                catch
+                {
+                    try
+                    {
+                        log.WriteLine(DateTime.Now.ToString("dd/MM/yy HH:mm") + " - Error de semántica en la linea " + this.actRow + " en la columna " +
+                            this.actColumn + ": Operación con string no valida");
+                        throw new MyException("Error de semántica en la linea " + this.actRow + " en la columna " +
+                            this.actColumn + ": Operación con string no valida ");
+                    }
+                    finally { closeFiles(); }
+                }
+            }
+            else
+            {
+                evalua.Push(double.Parse(variableValue));
+            }
+            }
 
         private bool existeVariable(string nombre)
         {
@@ -922,11 +983,11 @@ namespace Evalua
             switch (tipoD)
             {
                 case Variable.t.Char:
-                    val = (int) Math.Truncate(double.Parse(valor));
+                    val = (int)Math.Truncate(double.Parse(valor));
                     if (val < 256) return val.ToString();
                     return (val % 256).ToString();
                 case Variable.t.Int:
-                    val = (int) Math.Truncate(double.Parse(valor));
+                    val = (int)Math.Truncate(double.Parse(valor));
                     if (val < 65536) return val.ToString();
                     return (val % 65536).ToString();
                 case Variable.t.Float:
@@ -937,8 +998,10 @@ namespace Evalua
                     }
                     return val2.ToString();
                 case Variable.t.Double:
-                default:
                     return valor;
+                default:
+                    if (valor[0] == '"') return valor;
+                    return '"' + valor + '"';
             }
         }
 
