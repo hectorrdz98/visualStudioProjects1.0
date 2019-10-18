@@ -844,8 +844,8 @@ namespace Evalua
 
                     double value = Funcion(funcion, evalua.Pop());
 
-                    /*Variable.t tipoDatoFunction = tipoDatoValor(value.ToString());
-                    tipoDataExpresion = tipoDatoFunction;*/
+                    Variable.t tipoDatoFunction = tipoDatoValor(value.ToString());
+                    tipoDataExpresion = tipoDatoFunction;
 
                     evalua.Push(value);
                     if (ponerASM)
