@@ -1,0 +1,7 @@
+C:\Users\sasuk\source\repos\Generador\Generador\bin\Debug\Generador.exe.config
+C:\Users\sasuk\source\repos\Generador\Generador\bin\Debug\Generador.exe
+C:\Users\sasuk\source\repos\Generador\Generador\bin\Debug\Generador.pdb
+C:\Users\sasuk\source\repos\Generador\Generador\obj\Debug\Generador.csprojAssemblyReference.cache
+C:\Users\sasuk\source\repos\Generador\Generador\obj\Debug\Generador.csproj.CoreCompileInputs.cache
+C:\Users\sasuk\source\repos\Generador\Generador\obj\Debug\Generador.exe
+C:\Users\sasuk\source\repos\Generador\Generador\obj\Debug\Generador.pdb
