@@ -13,6 +13,7 @@ namespace Generador
     {
         public FileStream archivo;
         protected StreamWriter lenguaje;
+        protected StreamWriter program;
 
         private const int f = -1;
         private const int e = -2;
@@ -21,19 +22,20 @@ namespace Generador
 
         // https://pastebin.com/fCVEbKcx
         private int[,] Trnd = {
-            // WS  L   \   ;   -   >   (   )   ?   |   ᵝ
-            {  0,  1,  2,  4,  5, 11,  7,  8,  9, 10, 11  },
-            {  f,  1,  f,  f,  f,  f,  f,  f,  f,  f,  f  },
-            {  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3  },
-            {  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f  },
-            {  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f  },
-            {  f,  f,  f,  f,  f,  6,  f,  f,  f,  f,  f  },
-            {  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f  },
-            {  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f  },
-            {  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f  },
-            {  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f  },
-            {  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f  },
-            {  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f  }
+            // WS  L   \   ;   -   >   (   )   ?   |   #  0D   ᵝ
+            {  0,  1,  2,  4,  5, 11,  7,  8,  9, 10, 12,  0, 11  },
+            {  f,  1,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f  },
+            {  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3  },
+            {  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f  },
+            {  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f  },
+            {  f,  f,  f,  f,  f,  6,  f,  f,  f,  f,  f,  f,  f  },
+            {  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f  },
+            {  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f  },
+            {  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f  },
+            {  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f  },
+            {  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f  },
+            {  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f  },
+            { 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12,  0, 12  }
         };
 
         public Lexico()
@@ -49,6 +51,7 @@ namespace Generador
             }
             archivo = new FileStream(filePath, FileMode.Open, FileAccess.Read);
             lenguaje = new StreamWriter("C:\\archivos\\Lenguaje.cs");
+            program = new StreamWriter("C:\\archivos\\Program.cs");
         }
 
         public Lexico(string filePath)
@@ -72,22 +75,24 @@ namespace Generador
             }
             archivo = new FileStream(filePath, FileMode.Open, FileAccess.Read);
             lenguaje = new StreamWriter("C:\\archivos\\Lenguaje.cs");
+            program = new StreamWriter("C:\\archivos\\Program.cs");
         }
 
         public void closeFiles()
         {
             if (archivo != null) archivo.Close();
             if (lenguaje != null) lenguaje.Close();
+            if (program != null) program.Close();
         }
 
         private int getColumna(char transicion)
         {
-            /*if (transicion == 10)    Para el req #1
-            {
-                return 1;
-            }*/
             if (char.IsWhiteSpace(transicion))
             {
+                if (transicion == 10)
+                {
+                    return 11;
+                }
                 return 0;
             }
             else if (char.IsLetter(transicion))
@@ -126,8 +131,12 @@ namespace Generador
             {
                 return 9;
             }
+            else if (transicion == '#')
+            {
+                return 10;
+            }
 
-            return 10;
+            return 12;
         }
 
         public void nextToken()

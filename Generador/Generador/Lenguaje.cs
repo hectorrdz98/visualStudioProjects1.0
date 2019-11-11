@@ -8,6 +8,8 @@ namespace Generador
 {
     class Lenguaje : Sintaxis
     {
+        bool firstMethod = false;
+        int numTabs = 0;
         public Lenguaje() : base()
         {
 
@@ -26,46 +28,65 @@ namespace Generador
             Match("{");
             {
                 // https://pastebin.com/VxN0hr2v
-                lenguaje.WriteLine("using System;");
-                lenguaje.WriteLine("using System.Collections.Generic;");
-                lenguaje.WriteLine("using System.Linq;");
-                lenguaje.WriteLine("using System.Text;");
-                lenguaje.WriteLine("using System.Threading.Tasks;");
-                lenguaje.WriteLine();
-                lenguaje.WriteLine("namespace Generador");
-                lenguaje.WriteLine("{");
+                WriteLine("using System;");
+                WriteLine("using System.Collections.Generic;");
+                WriteLine("using System.Linq;");
+                WriteLine("using System.Text;");
+                WriteLine("using System.Threading.Tasks;");
+                WriteLine("");
+                WriteLine("namespace Generador");
+                WriteLine("{");
                 {
-                    lenguaje.WriteLine("\tclass Lenguaje : Sintaxis");
-                    lenguaje.WriteLine("\t{");
+                    numTabs++;
+                    WriteLine("class Lenguaje : Sintaxis");
+                    WriteLine("{");
                     {
-                        lenguaje.WriteLine("\t\tpublic Lenguaje() : base()");
-                        lenguaje.WriteLine("\t\t{");
-                        lenguaje.WriteLine();
-                        lenguaje.WriteLine("\t\t}");
-                        lenguaje.WriteLine("\t\tpublic Lenguaje(string filePath) : base(filePath)");
-                        lenguaje.WriteLine("\t\t{");
-                        lenguaje.WriteLine();
-                        lenguaje.WriteLine("\t\t}");
+                        numTabs++;
+                        WriteLine("public Lenguaje() : base()");
+                        WriteLine("{");
+                        WriteLine("");
+                        WriteLine("}");
+                        WriteLine("public Lenguaje(string filePath) : base(filePath)");
+                        WriteLine("{");
+                        WriteLine("");
+                        WriteLine("}");
+                        WriteLine("");
 
                         Producciones();
+
+                        numTabs--;
                     }
-                    lenguaje.WriteLine("\t}");
+                    WriteLine("}");
+                    numTabs--;
                 }
-                lenguaje.WriteLine("}");
+                WriteLine("}");
             }
             Match("}");
         }
 
         private void Producciones()
         {
-            lenguaje.WriteLine("\t\tpublic void " + getContenido() + "()");
+            if (firstMethod)
+            {
+                WriteLine("private void " + getContenido() + "()");
+            }
+            else
+            {
+                WriteLine("public void " + getContenido() + "()");
+                CreateProgramCS(getContenido());
+                firstMethod = true;
+            }
             Match(c.SNT);
             Match(c.Flechita);
 
-            lenguaje.WriteLine("\t\t{");
+            WriteLine("{");
+
+            numTabs++;
             LadoDerecho();
-            lenguaje.WriteLine("\t\t}");
-            lenguaje.WriteLine();
+            numTabs--;
+
+            WriteLine("}");
+            WriteLine("");
 
             Match(c.FinProduccion);
             if (getContenido() != "}")
@@ -76,27 +97,88 @@ namespace Generador
         {
             if (getClasificacion() == c.ST)
             {
-                lenguaje.WriteLine("\t\t\tMatch(\"" + getContenido() + "\");");
+                if (getContenido()[0] == '\\')
+                    WriteLine("Match(\"" + getContenido().Substring(1) + "\");");
+                else
+                    WriteLine("Match(\"" + getContenido() + "\");");
                 Match(c.ST);
-
             }
             else if (getClasificacion() == c.SNT)
             {
-                lenguaje.WriteLine("\t\t\t" + getContenido() + "();");
+                if (ClaseToken(getContenido()))
+                    WriteLine("Match(c." + getContenido() + ");");
+                else
+                    WriteLine(getContenido() + "();");
                 Match(c.SNT);
             }
             else if (getClasificacion() == c.ParentesisIzq)
             {
-                lenguaje.WriteLine("\t\t\t{");
+                WriteLine("{");
                 Match(c.ParentesisIzq);
+
+                numTabs++;
                 LadoDerecho();
+                numTabs--;
+
                 Match(c.ParentesisDer);
-                lenguaje.WriteLine("\t\t\t}");
+                WriteLine("}");
             }
 
             if (getClasificacion() != c.FinProduccion &&
                 getClasificacion() != c.ParentesisDer)
                 LadoDerecho();
+        }
+
+        private bool ClaseToken(string contenido)
+        {
+            string[] nums = { "Identificador", "Constante", "Numero", "If", "ForEach", "TipoDato", "String" };
+            return nums.Contains(contenido);
+        }
+
+        private void WriteLine(string contenido)
+        {
+            for (int i = 0; i < numTabs; i++) lenguaje.Write("\t");
+            lenguaje.WriteLine(contenido);
+        }
+
+        private void CreateProgramCS(string firstProduction) {
+            program.WriteLine("using System;");
+            program.WriteLine("using System.Collections.Generic;");
+            program.WriteLine("using System.Linq;");
+            program.WriteLine("using System.Text;");
+            program.WriteLine("using System.Threading.Tasks;");
+            program.WriteLine("");
+
+            program.WriteLine("namespace Generador");
+            program.WriteLine("{");
+            {
+                program.WriteLine("\tclass Program");
+                program.WriteLine("\t{");
+                {
+                    program.WriteLine("\t\tstatic void Main(string[] args)");
+                    program.WriteLine("\t\t{");
+                    {
+                        program.WriteLine("\t\t\ttry");
+                        program.WriteLine("\t\t\t{");
+                        {
+                            program.WriteLine("\t\t\t\tLenguaje L = new Lenguaje(\"C:\\\\archivos\\\\prueba.cs\\\\\");");
+                            program.WriteLine("");
+
+                            program.WriteLine("\t\t\t\tL." + firstProduction + "();");
+                            program.WriteLine("");
+
+                            program.WriteLine("\t\t\t\tConsole.ReadKey();");
+                            program.WriteLine("\t\t\t\tConsole.WriteLine();");
+                            program.WriteLine("\t\t\t\tL.closeFiles();");
+                        }
+                        program.WriteLine("\t\t\t}");
+                        program.WriteLine("\t\t\tcatch (MyException) { }");
+                    }
+                    program.WriteLine("\t\t}");
+                }
+                program.WriteLine("\t}");
+            }
+            program.WriteLine("}");
         }
     }
 }
