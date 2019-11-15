@@ -22,7 +22,7 @@ namespace Generador
 
         // https://pastebin.com/fCVEbKcx
         private int[,] Trnd = {
-            // WS  L   \   ;   -   >   (   )   ?   |   #  0D   ᵝ
+            // WS  L   \   ;   -   >   (   )   ?   |   #  0D   ᵝ 
             {  0,  1,  2,  4,  5, 11,  7,  8,  9, 10, 12,  0, 11  },
             {  f,  1,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f,  f  },
             {  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3,  3  },

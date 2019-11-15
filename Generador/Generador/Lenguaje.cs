@@ -147,7 +147,8 @@ namespace Generador
 
                 if (getClasificacion() == c.Epsilon)
                 {
-                    GeneraIf(firstMatch, false);
+                    if (ejecutar)
+                        GeneraIf(firstMatch, false);
                     Match(c.Epsilon);
                     wasEpsilon = true;
                 }
@@ -171,8 +172,12 @@ namespace Generador
                     WriteLine("}");
             }
 
+            if (archivo.Position >= archivo.Length)
+                return;
+
             if (getClasificacion() != c.FinProduccion &&
-                getClasificacion() != c.ParentesisDer)
+                getClasificacion() != c.ParentesisDer &&
+                getClasificacion() != c.Flechita)
                 LadoDerecho(ejecutar);
         }
 
