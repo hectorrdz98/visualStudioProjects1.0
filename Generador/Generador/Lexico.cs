@@ -189,6 +189,9 @@ namespace Generador
             {
                 if (char.IsLower(getContenido()[0]))
                     setClasificacion(c.ST);
+                string[] nums = { "Identificador", "Constante", "Numero", "If", "ForEach", "TipoDato", "String" };
+                if (nums.Contains(buffer))
+                    setClasificacion(c.ST);
             }
         }
     }

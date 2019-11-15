@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -93,43 +94,120 @@ namespace Generador
                 Producciones();
         }
 
-        private void LadoDerecho()
+        private void LadoDerecho(bool ejecutar = true)
         {
             if (getClasificacion() == c.ST)
             {
-                if (getContenido()[0] == '\\')
-                    WriteLine("Match(\"" + getContenido().Substring(1) + "\");");
-                else
-                    WriteLine("Match(\"" + getContenido() + "\");");
+                string simbolo = getContenido();
                 Match(c.ST);
+
+                if (getClasificacion() == c.Epsilon)
+                {
+                    if (ejecutar)
+                        GeneraIf(simbolo);
+                    Match(c.Epsilon);
+                }
+                else if (getClasificacion() == c.Or)
+                {
+                    if (ejecutar)
+                        GeneraIf(simbolo);
+                    Match(c.Or);
+                    if (ejecutar)
+                        WriteLine("else");
+
+                    bool vinoPar = getClasificacion() == c.ParentesisIzq;
+
+                    if (!vinoPar)
+                        numTabs++;
+                    LadoDerecho(ejecutar);
+                    if (!vinoPar)
+                        numTabs--;
+                }
+                else
+                {
+                    if (ejecutar)
+                        GeneraMatch(simbolo);
+                }
             }
             else if (getClasificacion() == c.SNT)
             {
-                if (ClaseToken(getContenido()))
-                    WriteLine("Match(c." + getContenido() + ");");
-                else
+                if (ejecutar)
                     WriteLine(getContenido() + "();");
+
                 Match(c.SNT);
             }
             else if (getClasificacion() == c.ParentesisIzq)
             {
-                WriteLine("{");
+                long position = archivo.Position;
                 Match(c.ParentesisIzq);
+                string firstMatch = getContenido();
+                bool wasEpsilon = false;
+                LadoDerecho(false);
+                Match(c.ParentesisDer);
+
+                if (getClasificacion() == c.Epsilon)
+                {
+                    GeneraIf(firstMatch, false);
+                    Match(c.Epsilon);
+                    wasEpsilon = true;
+                }
+
+                archivo.Seek(position, SeekOrigin.Begin);
+                nextToken(); // Leaves us after (
+
+                if (ejecutar)
+                    WriteLine("{");
 
                 numTabs++;
-                LadoDerecho();
+                LadoDerecho(ejecutar);
                 numTabs--;
 
                 Match(c.ParentesisDer);
-                WriteLine("}");
+
+                if (wasEpsilon)
+                    Match(c.Epsilon);
+
+                if (ejecutar)
+                    WriteLine("}");
             }
 
             if (getClasificacion() != c.FinProduccion &&
                 getClasificacion() != c.ParentesisDer)
-                LadoDerecho();
+                LadoDerecho(ejecutar);
         }
 
-        private bool ClaseToken(string contenido)
+        private void GeneraMatch(string simbolo)
+        {
+            if (simbolo[0] == '\\')
+                WriteLine("Match(\"" + simbolo.Substring(1) + "\");");
+            else
+            {
+                if (EsClasificacion(simbolo))
+                    WriteLine("Match(c." + simbolo + ");");
+                else
+                    WriteLine("Match(\"" + simbolo + "\");");
+            }
+        }
+
+        private void GeneraIf(string simbolo, bool generaMatch = true)
+        {
+            if (simbolo[0] == '\\')
+                WriteLine("if (getContenido() == \"" + simbolo.Substring(1) + "\")");
+            else
+            {
+                if (EsClasificacion(simbolo))
+                    WriteLine("if (getClasificacion() == c." + simbolo + ")");
+                else
+                    WriteLine("if (getContenido() == \"" + simbolo + "\")");
+            }
+
+            numTabs++;
+            if (generaMatch)
+                GeneraMatch(simbolo);
+            numTabs--;
+        }
+
+        private bool EsClasificacion(string contenido)
         {
             string[] nums = { "Identificador", "Constante", "Numero", "If", "ForEach", "TipoDato", "String" };
             return nums.Contains(contenido);
