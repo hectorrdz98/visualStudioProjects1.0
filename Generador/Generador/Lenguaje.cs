@@ -94,7 +94,7 @@ namespace Generador
                 Producciones();
         }
 
-        private void LadoDerecho(bool ejecutar = true)
+        private void LadoDerecho(bool ejecutar = true, int limit = -1)
         {
             if (getClasificacion() == c.ST)
             {
@@ -119,7 +119,7 @@ namespace Generador
 
                     if (!vinoPar)
                         numTabs++;
-                    LadoDerecho(ejecutar);
+                    LadoDerecho(ejecutar, 1);
                     if (!vinoPar)
                         numTabs--;
                 }
@@ -173,6 +173,11 @@ namespace Generador
             }
 
             if (archivo.Position >= archivo.Length)
+                return;
+
+            limit--;
+
+            if (limit == 0)
                 return;
 
             if (getClasificacion() != c.FinProduccion &&
