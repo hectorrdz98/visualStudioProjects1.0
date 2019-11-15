@@ -175,15 +175,15 @@ namespace Generador
             if (archivo.Position >= archivo.Length)
                 return;
 
+            // Max recursive limit
             limit--;
-
             if (limit == 0)
                 return;
 
             if (getClasificacion() != c.FinProduccion &&
                 getClasificacion() != c.ParentesisDer &&
                 getClasificacion() != c.Flechita)
-                LadoDerecho(ejecutar);
+                LadoDerecho(ejecutar, limit);
         }
 
         private void GeneraMatch(string simbolo)
