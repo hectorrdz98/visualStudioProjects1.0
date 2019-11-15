@@ -142,6 +142,7 @@ namespace Generador
                 Match(c.ParentesisIzq);
                 string firstMatch = getContenido();
                 bool wasEpsilon = false;
+                bool wasOr = false;
                 LadoDerecho(false);
                 Match(c.ParentesisDer);
 
@@ -151,6 +152,14 @@ namespace Generador
                         GeneraIf(firstMatch, false);
                     Match(c.Epsilon);
                     wasEpsilon = true;
+                }
+                if (getClasificacion() == c.Or)
+                {
+                    numTabs++;
+                    if (ejecutar)
+                        GeneraIf(firstMatch, false);
+                    Match(c.Or);
+                    wasOr = true;
                 }
 
                 archivo.Seek(position, SeekOrigin.Begin);
@@ -167,8 +176,28 @@ namespace Generador
 
                 if (wasEpsilon)
                     Match(c.Epsilon);
+                if (wasOr)
+                {
+                    Match(c.Or);
+                    if (ejecutar)
+                    {
+                        WriteLine("}");
+                        WriteLine("else");
 
-                if (ejecutar)
+                    }
+
+                    bool vinoPar = getClasificacion() == c.ParentesisIzq;
+
+                    if (!vinoPar)
+                        numTabs++;
+                    LadoDerecho(ejecutar, 1);
+                    if (!vinoPar)
+                        numTabs--;
+                    if (ejecutar)
+                        numTabs--;
+                }
+
+                if (ejecutar && !wasOr)
                     WriteLine("}");
             }
 
@@ -215,12 +244,6 @@ namespace Generador
             if (generaMatch)
                 GeneraMatch(simbolo);
             numTabs--;
-        }
-
-        private bool EsClasificacion(string contenido)
-        {
-            string[] nums = { "Identificador", "Constante", "Numero", "If", "ForEach", "TipoDato", "String" };
-            return nums.Contains(contenido);
         }
 
         private void WriteLine(string contenido)

@@ -189,10 +189,20 @@ namespace Generador
             {
                 if (char.IsLower(getContenido()[0]))
                     setClasificacion(c.ST);
-                string[] nums = { "Identificador", "Constante", "Numero", "If", "ForEach", "TipoDato", "String" };
-                if (nums.Contains(buffer))
+                if (EsClasificacion(buffer))
                     setClasificacion(c.ST);
             }
+        }
+
+        protected bool EsClasificacion(string contenido)
+        {
+            string[] nums = {
+                "Identificador", "Numero", "Asignacion", "OperadorLogico", "OperadorRelacional",
+                "OperadorTermino", "OperadorFactor", "IncrementoTermino", "IncrementoFactor", "Cadena",
+                "FinSentencia", "InicioBloque", "FinBloque", "Caracter", "TipoDato",
+                "Constante", "Funcion", "If", "ForEach"
+            };
+            return nums.Contains(contenido);
         }
     }
 }
